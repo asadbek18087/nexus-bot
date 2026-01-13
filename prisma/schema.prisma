@@ -1,0 +1,310 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Core Users ---
+
+model User {
+  id              String   @id @default(uuid())
+  telegramId      BigInt   @unique
+  username        String?
+  fullName        String?
+  phone           String?
+  email           String?
+  language        String   @default("uz")
+  joinedAt        DateTime @default(now())
+  
+  // Economy & Status
+  coins           Int      @default(0)      // Balance/Gold
+  xp              Int      @default(100)
+  level           Int      @default(1)
+  energy          Int      @default(100)
+  isPremium       Boolean  @default(false)
+  subscriptionType Int     @default(0) // 0=Free, 1=Trial, 2=Premium, etc.
+  subscriptionEnd DateTime?
+  
+  // Activity Stats
+  totalDownloads  Int      @default(0)
+  dailyDownloads  Int      @default(0)
+  dailyAiUsage    Int      @default(0)
+  aiLimit         Int      @default(3)
+  lastActive      DateTime @default(now())
+  streakCount     Int      @default(0)
+  
+  // Relations
+  inventory       InventoryItem[]
+  history         ActivityHistory[]
+  courses         UserCourse[]
+  miningFarm      MiningFarm?
+  quizzes         Quiz[]
+  payments        Payment[]
+  supportTickets  SupportTicket[]
+  referrals       Referral[]      @relation("Referrer")
+  referredBy      Referral?       @relation("Referred")
+  favorites       Favorite[]
+  reviews         Review[]
+  achievements    UserAchievement[]
+  
+  @@index([telegramId])
+}
+
+// --- Media Content ---
+
+model Movie {
+  id          String   @id @default(uuid())
+  code        String?  @unique
+  fileId      String?
+  caption     String?
+  title       String?
+  genre       String?
+  quality     String   @default("720p")
+  year        Int?
+  description String?
+  rating      Float    @default(0)
+  views       Int      @default(0)
+  downloads   Int      @default(0)
+  isActive    Boolean  @default(true)
+  uploadDate  DateTime @default(now())
+}
+
+model Book {
+  id          String   @id @default(uuid())
+  code        String?  @unique
+  fileId      String?
+  title       String?
+  author      String?
+  genre       String?
+  fileType    String   @default("pdf")
+  description String?
+  rating      Float    @default(0)
+  views       Int      @default(0)
+  downloads   Int      @default(0)
+  isActive    Boolean  @default(true)
+  uploadDate  DateTime @default(now())
+}
+
+model Podcast {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  fileId      String?
+  contentType String   @default("audio")
+  category    String   @default("General")
+  language    String   @default("uz")
+  duration    Int?
+  host        String?
+  isActive    Boolean  @default(true)
+  views       Int      @default(0)
+  downloads   Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+// --- Store & Inventory (Unified for Web App) ---
+
+model Product {
+  id          String   @id @default(uuid())
+  type        String   // "movie", "book", "tool_access"
+  title       String
+  priceCoins  Int
+  fileId      String?
+  category    String?
+  author      String?
+  description String?
+  rating      Float    @default(0)
+  image       String?
+  inventory   InventoryItem[]
+}
+
+model InventoryItem {
+  id          String   @id @default(uuid())
+  userId      String
+  productId   String
+  fileId      String?
+  status      String   @default("PENDING")
+  purchasedAt DateTime @default(now())
+  deliveredAt DateTime?
+  user        User     @relation(fields: [userId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
+}
+
+// --- Education (Academy) ---
+
+model Course {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  author      String
+  level       String
+  duration    String
+  priceCoins  Int      @default(0)
+  image       String?
+  modules     Module[]
+  students    UserCourse[]
+}
+
+model Module {
+  id          String   @id @default(uuid())
+  courseId    String
+  title       String
+  order       Int
+  course      Course   @relation(fields: [courseId], references: [id])
+  lessons     Lesson[]
+}
+
+model Lesson {
+  id          String   @id @default(uuid())
+  moduleId    String
+  title       String
+  content     String?
+  videoUrl    String?
+  duration    String?
+  order       Int
+  module      Module   @relation(fields: [moduleId], references: [id])
+}
+
+model UserCourse {
+  id          String   @id @default(uuid())
+  userId      String
+  courseId    String
+  progress    Int      @default(0)
+  completed   Boolean  @default(false)
+  enrolledAt  DateTime @default(now())
+  lastAccess  DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  course      Course   @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+}
+
+// --- Mining System ---
+
+model MiningFarm {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  level           Int      @default(1)
+  xpPerHour       Int      @default(10)
+  lastCollected   DateTime @default(now())
+  totalCollected  Int      @default(0)
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+// --- Quizzes ---
+
+model Quiz {
+  id            String   @id @default(uuid())
+  userId        String
+  title         String
+  topic         String?
+  category      String   @default("General")
+  difficulty    String   @default("medium")
+  questions     String   // JSON
+  score         Int      @default(0)
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id])
+  attempts      QuizAttempt[]
+}
+
+model QuizAttempt {
+  id            String   @id @default(uuid())
+  quizId        String
+  userId        String? // Optional linking
+  score         Int
+  totalQuestions Int
+  createdAt     DateTime @default(now())
+  quiz          Quiz     @relation(fields: [quizId], references: [id])
+}
+
+// --- Payments & Economy ---
+
+model Payment {
+  id          String   @id @default(uuid())
+  paymentId   String   @unique
+  userId      String
+  amount      Int
+  currency    String   @default("UZS")
+  status      String   @default("pending")
+  provider    String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model PromoCode {
+  id              String   @id @default(uuid())
+  code            String   @unique
+  discountPercent Int      @default(0)
+  maxUses         Int      @default(1)
+  usedCount       Int      @default(0)
+  isActive        Boolean  @default(true)
+}
+
+model Referral {
+  id          String   @id @default(uuid())
+  referrerId  String
+  referredId  String   @unique
+  xpGained    Int      @default(0)
+  createdAt   DateTime @default(now())
+  referrer    User     @relation("Referrer", fields: [referrerId], references: [id])
+  referred    User     @relation("Referred", fields: [referredId], references: [id])
+}
+
+// --- Support & System ---
+
+model SupportTicket {
+  id          String   @id @default(uuid())
+  ticketId    String   @unique
+  userId      String
+  category    String
+  message     String
+  status      String   @default("open")
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model ActivityHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+}
+
+model Favorite {
+  id          String   @id @default(uuid())
+  userId      String
+  itemType    String   // "movie", "book"
+  itemId      String
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, itemType, itemId])
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  userId      String
+  itemType    String
+  itemId      String
+  rating      Int
+  comment     String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model UserAchievement {
+  id            String   @id @default(uuid())
+  userId        String
+  achievementId String
+  earnedAt      DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id])
+  
+  @@unique([userId, achievementId])
+}

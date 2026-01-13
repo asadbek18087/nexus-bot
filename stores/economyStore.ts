@@ -1,0 +1,67 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+export interface Product {
+  id: string;
+  type: 'tool' | 'movie' | 'book';
+  title: string;
+  priceCoins: number;
+  fileId?: string;
+  isPremiumOnly: boolean;
+  description?: string;
+  icon?: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  productId: string;
+  purchasedAt: string;
+}
+
+interface EconomyState {
+  coins: number;
+  isPremium: boolean;
+  inventory: InventoryItem[];
+  
+  // Actions
+  addCoins: (amount: number) => void;
+  spendCoins: (amount: number) => boolean;
+  setPremium: (status: boolean) => void;
+  addToInventory: (item: InventoryItem) => void;
+  hasItem: (productId: string) => boolean;
+}
+
+export const useEconomyStore = create<EconomyState>()(
+  persist(
+    (set, get) => ({
+      coins: 100, // Initial balance
+      isPremium: false,
+      inventory: [],
+
+      addCoins: (amount) => set((state) => ({ coins: state.coins + amount })),
+      
+      spendCoins: (amount) => {
+        const { coins } = get();
+        if (coins >= amount) {
+          set((state) => ({ coins: state.coins - amount }));
+          return true;
+        }
+        return false;
+      },
+
+      setPremium: (status) => set({ isPremium: status }),
+      
+      addToInventory: (item) => set((state) => ({ 
+        inventory: [...state.inventory, item] 
+      })),
+      
+      hasItem: (productId) => {
+        const { inventory } = get();
+        return inventory.some((item) => item.productId === productId);
+      }
+    }),
+    {
+      name: 'nexus-economy-storage',
+    }
+  )
+);
