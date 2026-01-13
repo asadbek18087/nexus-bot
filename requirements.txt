@@ -1,0 +1,5 @@
+python-telegram-bot>=20.0
+requests>=2.31.0
+yt-dlp>=2023.12.30
+pydub>=0.25.1
+mutagen>=1.47.0
