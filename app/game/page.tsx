@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useEconomyStore } from '@/stores/economyStore';
 import SuperAppLayout from '@/components/SuperAppLayout';
 import { motion } from 'framer-motion';
-import { RotateCcw, Trophy, Gamepad2, ArrowRight } from 'lucide-react';
+import { RotateCcw, Trophy, Gamepad2, ArrowRight, Zap, Coins } from 'lucide-react';
 import Link from 'next/link';
 
 type Grid = (number | null)[][];
@@ -186,21 +186,23 @@ export default function GamePage() {
             <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
               2048
             </h1>
-            <p className="text-slate-400 text-sm">Merge tiles to earn coins!</p>
+            <p className="text-slate-400 text-sm">Plitkalarni birlashtiring va tangalar yig'ing!</p>
           </div>
 
           {/* Score Board */}
           <div className="flex justify-between mb-4 gap-4">
             <div className="flex-1 bg-slate-800 rounded-lg p-3 text-center">
-              <p className="text-slate-400 text-xs">Score</p>
+              <p className="text-slate-400 text-xs">Ball</p>
               <p className="text-2xl font-bold text-white">{score}</p>
             </div>
             <div className="flex-1 bg-slate-800 rounded-lg p-3 text-center">
-              <p className="text-slate-400 text-xs">Best</p>
+              <p className="text-slate-400 text-xs">Rekord</p>
               <p className="text-2xl font-bold text-white">{bestScore}</p>
             </div>
             <div className="flex-1 bg-gradient-to-r from-violet-600/20 to-cyan-600/20 rounded-lg p-3 text-center border border-violet-500/30">
-              <p className="text-slate-400 text-xs">Earned</p>
+              <p className="text-slate-400 text-xs flex items-center justify-center gap-1">
+                Yig'ilgan <Coins className="w-3 h-3 text-yellow-400" />
+              </p>
               <p className="text-2xl font-bold text-cyan-400">{sessionCoins.toFixed(1)}</p>
             </div>
           </div>
@@ -233,13 +235,13 @@ export default function GamePage() {
               >
                 <div className="text-center">
                   <Trophy className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold mb-2">Game Over!</h2>
-                  <p className="text-slate-400 mb-4">Final Score: {score}</p>
+                  <h2 className="text-2xl font-bold mb-2">O'yin Tugadi!</h2>
+                  <p className="text-slate-400 mb-4">Yakuniy Ball: {score}</p>
                   <button
                     onClick={resetGame}
                     className="px-6 py-2 bg-gradient-to-r from-violet-600 to-cyan-600 rounded-lg font-medium hover:opacity-90 transition-opacity"
                   >
-                    Play Again
+                    Qayta O'ynash
                   </button>
                 </div>
               </motion.div>
@@ -253,7 +255,7 @@ export default function GamePage() {
               className="flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
             >
               <RotateCcw className="w-4 h-4" />
-              New Game
+              Yangi O'yin
             </button>
           </div>
 
@@ -261,7 +263,7 @@ export default function GamePage() {
           <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
             <div className="flex items-center gap-2 mb-4">
               <Trophy className="w-5 h-5 text-yellow-400" />
-              <h3 className="font-bold text-lg text-white">Top Operatives</h3>
+              <h3 className="font-bold text-lg text-white">Top O'yinchilar</h3>
             </div>
             
             <div className="space-y-3">
@@ -269,16 +271,13 @@ export default function GamePage() {
                 { rank: 1, name: 'CommanderX', score: 50420, active: true },
                 { rank: 2, name: 'NeonRider', score: 48900, active: false },
                 { rank: 3, name: 'QuantumBit', score: 45200, active: false },
-                { rank: 4, name: 'CyberWolf', score: 42100, active: false },
-                { rank: 5, name: 'StarGazer', score: 38500, active: false },
               ].map((player) => (
                 <div key={player.rank} className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className={`w-6 h-6 flex items-center justify-center rounded font-bold text-xs ${
                       player.rank === 1 ? 'bg-yellow-500/20 text-yellow-400' :
                       player.rank === 2 ? 'bg-slate-400/20 text-slate-400' :
-                      player.rank === 3 ? 'bg-orange-500/20 text-orange-400' :
-                      'text-slate-500'
+                      'bg-orange-500/20 text-orange-400'
                     }`}>
                       #{player.rank}
                     </div>
@@ -291,35 +290,9 @@ export default function GamePage() {
           </div>
 
           {/* Instructions */}
-          <p className="text-center text-slate-500 text-sm mb-6">
-            Use arrow keys or swipe to play
+          <p className="text-center text-slate-500 text-sm mb-6 mt-6">
+            O'ynash uchun suring yoki strelkalardan foydalaning
           </p>
-
-          {/* More Games */}
-          <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-            <div className="flex items-center gap-2 mb-4">
-              <Gamepad2 className="w-5 h-5 text-violet-400" />
-              <h3 className="font-bold text-lg text-white">More Games</h3>
-            </div>
-            
-            <div className="grid gap-3">
-              <Link
-                href="/games/memory"
-                className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-all hover:scale-[1.02] group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-xl font-bold">
-                    🎴
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">Memory Cards</p>
-                    <p className="text-xs text-slate-400">Test your memory</p>
-                  </div>
-                </div>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-purple-400 transition-colors" />
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
     </SuperAppLayout>

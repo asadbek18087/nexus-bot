@@ -22,7 +22,8 @@ import {
   Users,
   Gift,
   Layers,
-  Info
+  Info,
+  Gamepad2
 } from 'lucide-react';
 
 export default function HubPage() {
@@ -232,6 +233,23 @@ export default function HubPage() {
                 <div>
                   <h3 className="text-lg font-bold text-slate-100">Flashcards</h3>
                   <p className="text-slate-500 text-xs">Interaktiv kartochkalar orqali o'rganing.</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-slate-600 group-hover:translate-x-1 transition-transform" />
+            </Link>
+
+            <Link
+              href="/game"
+              className="flex items-center justify-between p-5 bg-slate-900/40 rounded-2xl border border-white/5 hover:bg-slate-900/60 transition-all group"
+            >
+              <div className="flex gap-4 items-center">
+                <div className="bg-emerald-500/10 p-3 rounded-xl border border-white/5 relative">
+                  <Gamepad2 className="w-6 h-6 text-emerald-400" />
+                  <span className="absolute -top-1 -right-1 bg-emerald-600 text-[8px] font-bold px-1.5 py-0.5 rounded-full text-white border border-slate-950">FUN</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-100">Dam olish xonasi</h3>
+                  <p className="text-slate-500 text-xs">2048 o'yinini o'ynab hordiq chiqaring.</p>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-600 group-hover:translate-x-1 transition-transform" />
