@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SuperAppLayout from '@/components/SuperAppLayout';
 import Link from 'next/link';
 import { useEconomyStore } from '@/stores/economyStore';
+import { useNotificationStore } from '@/stores/notificationStore';
 import { 
   BrainCircuit, 
   Sparkles, 
@@ -20,11 +21,13 @@ import {
   AlertCircle,
   Users,
   Gift,
-  Layers
+  Layers,
+  Info
 } from 'lucide-react';
 
 export default function HubPage() {
   const { coins, addCoins } = useEconomyStore();
+  const { addNotification } = useNotificationStore();
   const [showDailyBonus, setShowDailyBonus] = useState(false);
 
   useEffect(() => {
@@ -32,15 +35,22 @@ export default function HubPage() {
     const onboarded = localStorage.getItem('nexus_onboarded');
     if (!onboarded) {
       localStorage.setItem('nexus_onboarded', 'true');
+      addNotification({
+        id: 'welcome',
+        title: 'Nexus-ga xush kelibsiz! 🚀',
+        message: 'Bilim olishni AI testlardan boshlang va tangalar yig\'ing.',
+        type: 'info',
+        timestamp: new Date().toISOString()
+      });
     }
 
     // Daily bonus check
     const lastClaim = localStorage.getItem('nexus_last_claim');
     const today = new Date().toDateString();
     if (lastClaim !== today) {
-      setShowDailyBonus(true);
+      setTimeout(() => setShowDailyBonus(true), 1500);
     }
-  }, []);
+  }, [addNotification]);
 
   const claimDailyBonus = () => {
     addCoins(50);

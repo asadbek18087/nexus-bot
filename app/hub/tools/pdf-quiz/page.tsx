@@ -7,10 +7,12 @@ import { useRouter } from 'next/navigation';
 import SuperAppLayout from '@/components/SuperAppLayout';
 import { QuantumCard, QuantumButton } from '@/components/quantum-effects';
 import { useEconomyStore } from '@/stores/economyStore';
+import { useQuizStore } from '@/stores/quizStore';
 
 export default function PdfQuizPage() {
   const router = useRouter();
   const { coins, spendCoins } = useEconomyStore();
+  const { setQuestions, setMode, setTopic } = useQuizStore();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [step, setStep] = useState<'upload' | 'processing' | 'ready'>('upload');
@@ -21,18 +23,39 @@ export default function PdfQuizPage() {
     }
   };
 
-  const startProcessing = () => {
+  const startProcessing = async () => {
     if (!file || coins < 50) return;
     
-    spendCoins(50);
     setIsUploading(true);
     setStep('processing');
     
-    // Simulate processing
-    setTimeout(() => {
-      setIsUploading(false);
-      setStep('ready');
-    }, 3000);
+    try {
+      // In a real app, we would upload the PDF and get questions back
+      // For now, we'll simulate a successful extraction after 3s
+      setTimeout(() => {
+        const mockQuestions = [
+          {
+            id: 'pdf_1',
+            question: "PDF tahlili natijasida: Sun'iy intellektning asosiy maqsadi nima?",
+            options: ["Inson ongini nusxalash", "Muammolarni aqlli hal qilish", "Robotlar yasash", "O'yinlar o'ynash"],
+            correctAnswer: 1,
+            explanation: "To'g'ri javob - Muammolarni aqlli hal qilish. AI inson intellektini simulyatsiya qilib, murakkab vazifalarni bajarish uchun mo'ljallangan.",
+            category: "PDF Tahlili",
+            difficulty: "medium"
+          }
+        ];
+        
+        spendCoins(50);
+        setQuestions(mockQuestions as any);
+        setTopic(file.name);
+        setMode('practice');
+        setIsUploading(false);
+        setStep('ready');
+      }, 3000);
+    } catch (e) {
+      alert("Xatolik yuz berdi.");
+      setStep('upload');
+    }
   };
 
   return (

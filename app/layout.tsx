@@ -6,8 +6,8 @@ import { Toaster } from 'react-hot-toast'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Nexus Super App',
-  description: 'Play, Pay, or Subscribe - Your Ultimate Entertainment Hub',
+  title: 'Nexus - AI Super App 🚀',
+  description: 'Sun\'iy intellekt yordamida bilim olish va ko\'ngilochar platforma. Testlar, prezentatsiyalar, kinolar va kitoblar bir joyda!',
 }
 
 export default function RootLayout({

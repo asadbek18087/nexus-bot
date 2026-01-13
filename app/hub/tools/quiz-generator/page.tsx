@@ -7,10 +7,12 @@ import { useRouter } from 'next/navigation';
 import SuperAppLayout from '@/components/SuperAppLayout';
 import { QuantumCard, QuantumButton } from '@/components/quantum-effects';
 import { useEconomyStore } from '@/stores/economyStore';
+import { useQuizStore } from '@/stores/quizStore';
 
 export default function QuizGeneratorPage() {
   const router = useRouter();
   const { coins, spendCoins } = useEconomyStore();
+  const { setQuestions, setMode, setTopic: setStoreTopic } = useQuizStore();
   const [topic, setTopic] = useState('');
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [count, setCount] = useState(10);
@@ -20,13 +22,29 @@ export default function QuizGeneratorPage() {
     if (!topic || coins < 30) return;
     
     setIsGenerating(true);
-    spendCoins(30);
-    
-    // Simulate generation
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/ai-quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, count, difficulty })
+      });
+      
+      const data = await response.json();
+      if (data.success && data.questions.length > 0) {
+        spendCoins(30);
+        setQuestions(data.questions);
+        setStoreTopic(topic);
+        setMode('practice');
+        router.push('/quiz');
+      } else {
+        alert("Savollar yaratishda xatolik yuz berdi.");
+      }
+    } catch (error) {
+      console.error('Generation error:', error);
+      alert("Server bilan bog'lanishda xatolik.");
+    } finally {
       setIsGenerating(false);
-      router.push('/quiz'); // In real app, pass the generated questions
-    }, 3000);
+    }
   };
 
   return (

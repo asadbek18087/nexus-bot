@@ -18,7 +18,8 @@ import {
   Star,
   Activity,
   Crown,
-  History
+  History,
+  AlertCircle
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import SuperAppLayout from '@/components/SuperAppLayout';
@@ -27,20 +28,27 @@ import { useEconomyStore } from '@/stores/economyStore';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { coins, isPremium } = useEconomyStore();
+  const { coins, isPremium, xp, level } = useEconomyStore();
   const [mounted, setMounted] = useState(false);
+  const [activeSection, setActiveSection] = useState<'overview' | 'achievements' | 'dna'>('overview');
+  const [categoryStats, setCategoryStats] = useState<Record<string, { total: number; correct: number }>>({});
 
   useEffect(() => {
     setMounted(true);
+    const savedStats = JSON.parse(localStorage.getItem('nexus_category_stats') || '{}');
+    setCategoryStats(savedStats);
   }, []);
 
   if (!mounted) return null;
 
+  const xpToNext = level * 1000;
+  const streak = parseInt(localStorage.getItem('nexus_streak') || '0');
+
   const stats = [
-    { label: "Daraja", value: "24", icon: Star, color: "text-amber-400", bg: "bg-amber-400/10" },
-    { label: "Tajriba (XP)", value: "12,450", icon: Zap, color: "text-violet-400", bg: "bg-violet-400/10" },
-    { label: "Aniqlik", value: "87%", icon: Target, color: "text-emerald-400", bg: "bg-emerald-400/10" },
-    { label: "Streak", value: "7 kun", icon: Flame, color: "text-orange-500", bg: "bg-orange-500/10" },
+    { label: "Daraja", value: level.toString(), icon: Star, color: "text-amber-400", bg: "bg-amber-400/10" },
+    { label: "Tajriba (XP)", value: xp.toLocaleString(), icon: Zap, color: "text-violet-400", bg: "bg-violet-400/10" },
+    { label: "Balans", value: coins.toLocaleString(), icon: Coins, color: "text-emerald-400", bg: "bg-emerald-400/10" },
+    { label: "Streak", value: `${streak} kun`, icon: Flame, color: "text-orange-500", bg: "bg-orange-500/10" },
   ];
 
   const achievements = [
@@ -141,6 +149,85 @@ export default function ProfilePage() {
               ))}
             </div>
           </div>
+
+          {/* Global Leaderboard */}
+          <div>
+            <div className="flex items-center justify-between mb-4 px-2">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-amber-400" />
+                Global Reyting
+              </h2>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full font-bold uppercase">Siz: #124</span>
+            </div>
+            <div className="bg-slate-900/40 rounded-3xl border border-white/5 overflow-hidden mb-8">
+              {[
+                { rank: 1, name: "Azizbek", xp: "45,200", streak: 42, color: "text-amber-400" },
+                { rank: 2, name: "Madina", xp: "38,150", streak: 28, color: "text-slate-300" },
+                { rank: 3, name: "Sardor", xp: "32,900", streak: 15, color: "text-orange-400" },
+              ].map((user, i) => (
+                <div key={i} className={`flex items-center justify-between p-4 ${i !== 2 ? 'border-b border-white/5' : ''} hover:bg-white/[0.02] transition-colors`}>
+                  <div className="flex items-center gap-4">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${user.color} bg-white/5`}>
+                      {user.rank}
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-200 text-sm">{user.name}</div>
+                      <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                        <Zap className="w-3 h-3" /> {user.xp} XP
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-orange-500/10 px-2 py-1 rounded-lg">
+                    <Flame className="w-3 h-3 text-orange-500" />
+                    <span className="text-[10px] font-bold text-orange-500">{user.streak}</span>
+                  </div>
+                </div>
+              ))}
+              <button className="w-full py-3 bg-white/[0.02] text-slate-500 text-[10px] font-bold uppercase tracking-widest hover:text-slate-300 transition-colors">
+                To'liq ro'yxatni ko'rish
+              </button>
+            </div>
+          </div>
+
+          {/* Weakness Tracker (Mavzular tahlili) */}
+          {Object.keys(categoryStats).length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-4 px-2">
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Target className="w-5 h-5 text-emerald-400" />
+                  Mavzular tahlili
+                </h2>
+              </div>
+              <div className="bg-slate-900/40 rounded-3xl border border-white/5 p-6 space-y-6">
+                {Object.entries(categoryStats).map(([cat, stat]) => {
+                  const perc = Math.round((stat.correct / stat.total) * 100);
+                  return (
+                    <div key={cat} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-bold text-slate-300">{cat}</span>
+                        <span className={`text-xs font-black ${perc < 50 ? 'text-red-400' : perc < 80 ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                          {perc}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-white/[0.02]">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${perc}%` }}
+                          className={`h-full ${perc < 50 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : perc < 80 ? 'bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.3)]' : 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]'}`} 
+                        />
+                      </div>
+                      {perc < 50 && (
+                        <div className="flex items-center gap-1.5 text-[10px] text-red-400/60 italic font-medium">
+                          <AlertCircle className="w-3 h-3" />
+                          Ushbu mavzuda ko'proq ishlash tavsiya etiladi
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Quick Links */}
           <div className="space-y-2">

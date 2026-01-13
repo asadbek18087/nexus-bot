@@ -10,7 +10,7 @@ import { useEconomyStore } from '@/stores/economyStore';
 
 export default function AiPresentationPage() {
   const router = useRouter();
-  const { coins, spendCoins } = useEconomyStore();
+  const { coins, spendCoins, addToInventory } = useEconomyStore();
   const [topic, setTopic] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [step, setStep] = useState<'input' | 'processing' | 'ready'>('input');
@@ -20,10 +20,15 @@ export default function AiPresentationPage() {
     
     setIsGenerating(true);
     setStep('processing');
-    spendCoins(100);
     
     // Simulate generation
     setTimeout(() => {
+      spendCoins(100);
+      addToInventory({
+        id: `pres_${Date.now()}`,
+        productId: 'ai_presentation',
+        purchasedAt: new Date().toISOString()
+      });
       setIsGenerating(false);
       setStep('ready');
     }, 5000);
