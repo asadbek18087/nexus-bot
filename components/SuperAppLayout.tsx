@@ -86,7 +86,9 @@ export default function SuperAppLayout({ children }: SuperAppLayoutProps) {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pb-16">
-        {children}
+        <div className="max-w-6xl mx-auto">
+          {children}
+        </div>
       </main>
 
       {/* Bottom Navigation */}

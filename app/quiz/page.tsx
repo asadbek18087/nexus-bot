@@ -13,6 +13,7 @@ interface QuizQuestion {
   question: string;
   options: string[];
   correctAnswer: number;
+  explanation?: string;
   category: string;
   difficulty: 'easy' | 'medium' | 'hard';
 }
@@ -23,6 +24,8 @@ export default function QuizPage() {
   const [score, setScore] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [showExplanation, setShowExplanation] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [credits, setCredits] = useState(5); // Daily limits from bot
   const [isGenerating, setIsGenerating] = useState(false);
@@ -39,6 +42,7 @@ export default function QuizPage() {
       question: "What is the capital of France?",
       options: ["London", "Berlin", "Paris", "Madrid"],
       correctAnswer: 2,
+      explanation: "To'g'ri javob - Paris. Fransiya poytaxti 987-yildan beri Paris shahridir. London - Buyuk Britaniya, Berlin - Germaniya, Madrid - Ispaniya poytaxtlari.",
       category: "Geography",
       difficulty: "easy"
     },
@@ -60,6 +64,7 @@ export default function QuizPage() {
           question: "Which quantum particle is responsible for electromagnetic force?",
           options: ["Gluon", "Photon", "Higgs Boson", "Graviton"],
           correctAnswer: 1,
+          explanation: "To'g'ri javob - Photon. Foton elektromagnit kuchni tashuvchi kvant zarrachasidir. Gluon - kuchli o'zaro ta'sir, Higgs Boson - massa beruvchi, Graviton - gravitatsiya (hali topilmagan).",
           category: "Quantum Physics",
           difficulty: "hard"
         },
@@ -68,6 +73,7 @@ export default function QuizPage() {
           question: "Who coined the term 'Artificial Intelligence'?",
           options: ["Alan Turing", "John McCarthy", "Marvin Minsky", "Elon Musk"],
           correctAnswer: 1,
+          explanation: "To'g'ri javob - John McCarthy. U 1956-yilda Dartmouth konferensiyasida 'Artificial Intelligence' atamasini kiritgan. Alan Turing - hisoblash nazariyasi asoschisi, Marvin Minsky - AI sohasida muhim olim.",
           category: "AI History",
           difficulty: "medium"
         },
@@ -76,6 +82,7 @@ export default function QuizPage() {
           question: "What is the speed of light in vacuum?",
           options: ["299,792 km/s", "300,000 km/s", "150,000 km/s", "Unlimited"],
           correctAnswer: 0,
+          explanation: "To'g'ri javob - 299,792 km/s. Yorug'likning vakuumdagi aniq tezligi 299,792,458 m/s. 300,000 km/s taxminan qiymat, 150,000 km/s - yorug'likning suvda tezligi.",
           category: "Physics",
           difficulty: "medium"
         }
@@ -87,6 +94,9 @@ export default function QuizPage() {
   };
 
   const handleAnswer = (answerIndex: number) => {
+    setSelectedAnswer(answerIndex);
+    setShowExplanation(true);
+    
     const newAnswers = [...answers, answerIndex];
     setAnswers(newAnswers);
     
@@ -94,11 +104,16 @@ export default function QuizPage() {
       setScore(score + 20);
     }
 
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      handleQuizComplete();
-    }
+    // Auto-advance after showing explanation
+    setTimeout(() => {
+      if (currentQuestion < questions.length - 1) {
+        setCurrentQuestion(currentQuestion + 1);
+        setSelectedAnswer(null);
+        setShowExplanation(false);
+      } else {
+        handleQuizComplete();
+      }
+    }, 3000); // 3 seconds to read explanation
   };
 
   const handleQuizComplete = useCallback(() => {
@@ -401,23 +416,64 @@ export default function QuizPage() {
               
               {/* Options */}
               <div className="space-y-3">
-                {questions[currentQuestion].options.map((option, i) => (
-                  <motion.button
-                    key={i}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleAnswer(i)}
-                    className="w-full p-4 rounded-xl bg-slate-800/50 hover:bg-slate-800/80 border border-slate-700 hover:border-purple-500/50 transition-all text-left"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold">
-                        {String.fromCharCode(65 + i)}
+                {questions[currentQuestion].options.map((option, i) => {
+                  const isCorrect = i === questions[currentQuestion].correctAnswer;
+                  const isSelected = i === selectedAnswer;
+                  const showResult = selectedAnswer !== null;
+                  
+                  return (
+                    <motion.button
+                      key={i}
+                      whileHover={{ scale: showResult ? 1 : 1.02 }}
+                      whileTap={{ scale: showResult ? 1 : 0.98 }}
+                      onClick={() => !showResult && handleAnswer(i)}
+                      disabled={showResult}
+                      className={`w-full p-4 rounded-xl border transition-all text-left ${
+                        showResult
+                          ? isCorrect
+                            ? 'bg-green-500/20 border-green-500/50'
+                            : isSelected
+                            ? 'bg-red-500/20 border-red-500/50'
+                            : 'bg-slate-800/30 border-slate-700/50'
+                          : 'bg-slate-800/50 hover:bg-slate-800/80 border-slate-700 hover:border-purple-500/50'
+                      }`}
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                          showResult
+                            ? isCorrect
+                              ? 'bg-green-500 text-white'
+                              : isSelected
+                              ? 'bg-red-500 text-white'
+                              : 'bg-slate-700 text-slate-400'
+                            : 'bg-slate-700'
+                        }`}>
+                          {showResult && isCorrect ? '✓' : showResult && isSelected ? '✗' : String.fromCharCode(65 + i)}
+                        </span>
+                        <span className={showResult && isCorrect ? 'text-green-400' : showResult && isSelected ? 'text-red-400' : ''}>
+                          {option}
+                        </span>
                       </span>
-                      {option}
-                    </span>
-                  </motion.button>
-                ))}
+                    </motion.button>
+                  );
+                })}
               </div>
+              
+              {/* Explanation */}
+              {showExplanation && questions[currentQuestion].explanation && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 p-4 rounded-xl bg-blue-500/10 border border-blue-500/30"
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-blue-400 font-bold">Nega?</span>
+                    <p className="text-sm text-blue-300">
+                      {questions[currentQuestion].explanation}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
             </QuantumCard>
           </motion.div>
         </div>

@@ -73,9 +73,10 @@ export async function POST(request: NextRequest) {
     - "question": question text in ${language === 'uz' ? 'Uzbek' : 'English'}
     - "options": array of 4 options in ${language === 'uz' ? 'Uzbek' : 'English'}
     - "correct": index of correct answer (0-3)
-    - "explanation": brief explanation of the correct answer
+    - "explanation": detailed explanation (2-3 sentences) explaining WHY the correct answer is right and WHY other options are wrong
     
-    Make questions engaging and educational.
+    Make questions engaging and educational. The explanation should help users understand the concept better.
+    For wrong answers, briefly explain why they are incorrect.
     Return ONLY valid JSON array, no other text.`;
 
     const response = await fetch(OPENAI_API_URL, {
