@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import SuperAppLayout from '@/components/SuperAppLayout';
 import { useEconomyStore } from '@/stores/economyStore';
 import { motion } from 'framer-motion';
-import { Coins, Crown, Zap, CheckCircle, ArrowRight, Sparkles } from 'lucide-react';
+import { Coins, Crown, Zap, CheckCircle, ArrowRight, Sparkles, ArrowLeft } from 'lucide-react';
+import { QuantumButton, QuantumCard } from '@/components/quantum-effects';
 
 interface CoinPackage {
   id: string;
@@ -17,49 +18,61 @@ interface CoinPackage {
 }
 
 const packages: CoinPackage[] = [
-  { id: 'small', amount: 100, price: '3,000 UZS', priceValue: 3000 },
-  { id: 'medium', amount: 550, price: '15,000 UZS', priceValue: 15000, bonus: 50 },
-  { id: 'large', amount: 1150, price: '29,000 UZS', priceValue: 29000, bonus: 150, popular: true },
-  { id: 'xlarge', amount: 6000, price: '99,000 UZS', priceValue: 99000, bonus: 1000 },
-  { id: 'mega', amount: 12500, price: '199,000 UZS', priceValue: 199000, bonus: 2500 },
+  { id: 'small', amount: 100, price: '3 000 UZS', priceValue: 3000 },
+  { id: 'medium', amount: 550, price: '15 000 UZS', priceValue: 15000, bonus: 50 },
+  { id: 'large', amount: 1150, price: '29 000 UZS', priceValue: 29000, bonus: 150, popular: true },
+  { id: 'xlarge', amount: 6000, price: '99 000 UZS', priceValue: 99000, bonus: 1000 },
+  { id: 'mega', amount: 12500, price: '199 000 UZS', priceValue: 199000, bonus: 2500 },
 ];
 
 export default function BuyCoinsPage() {
   const router = useRouter();
-  const { coins, addCoins } = useEconomyStore();
+  const { coins } = useEconomyStore();
   const [selectedPackage, setSelectedPackage] = useState<string>('large');
-  const [processing, setProcessing] = useState(false);
 
   const handlePurchase = (pkg: CoinPackage) => {
-    // Redirect to @polway_bot for payment processing
-    window.open(`https://t.me/polway_bot?start=buy_coins_${pkg.id}`, '_blank');
+    // Redirect to @nexus_support_bot for payment processing
+    window.open(`https://t.me/nexus_support_bot?start=buy_coins_${pkg.id}`, '_blank');
   };
 
   return (
     <SuperAppLayout>
-      <div className="min-h-screen p-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
+      <div className="min-h-screen bg-slate-950 pb-20">
+        {/* Header */}
+        <div className="bg-slate-900/50 backdrop-blur-lg border-b border-white/10 p-4 sticky top-0 z-50">
+          <div className="max-w-2xl mx-auto flex items-center gap-4">
+            <button onClick={() => router.back()} className="text-slate-400 hover:text-white transition-colors">
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <h1 className="text-xl font-bold">Tangalar sotib olish</h1>
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto p-4 py-8">
+          {/* Balance Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
+            className="mb-10"
           >
-            <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-              Buy Coins
-            </h1>
-            <p className="text-slate-400 text-lg">
-              Get more coins to unlock premium content and features
-            </p>
-            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-800/50 rounded-full">
-              <Coins className="w-5 h-5 text-cyan-400" />
-              <span className="font-semibold">Current Balance: {coins.toLocaleString()}</span>
+            <div className="bg-gradient-to-br from-cyan-600/20 to-blue-900/20 rounded-3xl p-8 border border-cyan-500/20 text-center relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <Coins className="w-32 h-32 text-cyan-400 -rotate-12" />
+              </div>
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-cyan-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/30 shadow-lg shadow-cyan-500/20">
+                  <Coins className="w-8 h-8 text-cyan-400" />
+                </div>
+                <h2 className="text-sm font-bold text-cyan-400 uppercase tracking-widest mb-1">Joriy balans</h2>
+                <div className="text-4xl font-black text-white">{coins.toLocaleString()}</div>
+                <p className="text-slate-500 text-xs mt-2 italic">Tangalaringiz barcha funksiyalar uchun ishlaydi</p>
+              </div>
             </div>
           </motion.div>
 
           {/* Coin Packages */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
-            {packages.map((pkg) => {
+            {packages.map((pkg, index) => {
               const totalCoins = pkg.amount + (pkg.bonus || 0);
               const isSelected = selectedPackage === pkg.id;
               
@@ -68,36 +81,33 @@ export default function BuyCoinsPage() {
                   key={pkg.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: packages.indexOf(pkg) * 0.1 }}
+                  transition={{ delay: index * 0.05 }}
                   onClick={() => setSelectedPackage(pkg.id)}
-                  className={`relative bg-slate-800/50 rounded-2xl p-6 border cursor-pointer transition-all ${
+                  className={`relative bg-slate-900/40 rounded-2xl p-6 border cursor-pointer transition-all active:scale-[0.98] ${
                     isSelected
-                      ? 'border-cyan-500/50 shadow-lg shadow-cyan-500/20 scale-105'
-                      : 'border-slate-700 hover:border-cyan-400/50'
+                      ? 'border-cyan-500/50 bg-slate-900/60 shadow-lg shadow-cyan-500/10'
+                      : 'border-white/5 hover:border-white/10'
                   }`}
                 >
                   {pkg.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-full text-xs font-medium text-white">
-                      Most Popular
+                    <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-orange-500 to-red-600 rounded-full text-[10px] font-black text-white uppercase tracking-tighter shadow-lg shadow-orange-500/20">
+                      Eng ommabop
                     </div>
                   )}
 
-                  <div className="text-center mb-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Coins className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="text-3xl font-bold text-white mb-1">
+                  <div className="text-center mb-6">
+                    <div className="text-3xl font-black text-white mb-1">
                       {totalCoins.toLocaleString()}
                     </div>
-                    <div className="text-sm text-slate-400">coins</div>
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tangalar</div>
                   </div>
 
                   {pkg.bonus && (
-                    <div className="text-center mb-4">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/20 border border-green-500/50 rounded text-xs text-green-400">
+                    <div className="flex justify-center mb-6">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-bold text-emerald-400">
                         <Sparkles className="w-3 h-3" />
                         +{pkg.bonus} bonus
-                      </span>
+                      </div>
                     </div>
                   )}
 
@@ -110,80 +120,41 @@ export default function BuyCoinsPage() {
                       e.stopPropagation();
                       handlePurchase(pkg);
                     }}
-                    disabled={processing}
-                    className={`w-full py-3 rounded-lg font-medium transition-all ${
+                    className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
                       isSelected
-                        ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:opacity-90'
-                        : 'bg-slate-700 hover:bg-slate-600'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20'
+                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    }`}
                   >
-                    {processing ? 'Processing...' : 'Buy Now'}
+                    Sotib olish
                   </button>
                 </motion.div>
               );
             })}
           </div>
 
-          {/* Features */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-slate-800/30 rounded-2xl p-8"
-          >
-            <h2 className="text-2xl font-bold text-center mb-8">What Can You Do With Coins?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-violet-600 to-violet-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Crown className="w-6 h-6 text-white" />
+          {/* Features / Why Buy Coins? */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { icon: Zap, title: "AI Testlar", desc: "Har bir test yaratish uchun tangalar kerak", color: "text-amber-400", bg: "bg-amber-400/10" },
+              { icon: Sparkles, title: "Jokerlar", desc: "Testda 50/50 va AI yordamidan foydalaning", color: "text-violet-400", bg: "bg-violet-400/10" },
+              { icon: CheckCircle, title: "Prezentatsiyalar", desc: "Murakkab mavzularda AI prezentatsiyalar yarating", color: "text-cyan-400", bg: "bg-cyan-400/10" },
+              { icon: Crown, title: "Cheksiz Imkoniyat", desc: "Limitlarni oshiring va o'rganishni tezlashtiring", color: "text-emerald-400", bg: "bg-emerald-400/10" },
+            ].map((feature, i) => (
+              <div key={i} className="flex gap-4 p-5 bg-slate-900/40 rounded-2xl border border-white/5">
+                <div className={`w-12 h-12 shrink-0 rounded-xl ${feature.bg} flex items-center justify-center`}>
+                  <feature.icon className={`w-6 h-6 ${feature.color}`} />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">Premium Content</h3>
-                  <p className="text-sm text-slate-400">Unlock exclusive movies and books</p>
+                  <h3 className="font-bold text-slate-100">{feature.title}</h3>
+                  <p className="text-slate-500 text-xs mt-1">{feature.desc}</p>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-600 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Energy Boosts</h3>
-                  <p className="text-sm text-slate-400">Get more energy for AI tools</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Power-ups</h3>
-                  <p className="text-sm text-slate-400">Enhance your gaming experience</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <CheckCircle className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Skip Waits</h3>
-                  <p className="text-sm text-slate-400">Instant access to all features</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Payment Info */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="mt-8 text-center text-sm text-slate-500"
-          >
-            <p>Secure payment via Click / Payme / Telegram</p>
-            <p>Coins are added to your account instantly</p>
-          </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </SuperAppLayout>
   );
 }
+

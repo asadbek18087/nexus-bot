@@ -7,8 +7,8 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to game page as the main entry point
-    router.replace('/game');
+    // Redirect to hub page as the main entry point
+    router.replace('/hub');
   }, [router]);
 
   return (

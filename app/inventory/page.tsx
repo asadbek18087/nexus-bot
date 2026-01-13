@@ -52,16 +52,13 @@ export default function InventoryPage() {
   const [filter, setFilter] = useState<'all' | 'movies' | 'books' | 'tools'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Combine store inventory with mock data and map to display format
   const allItems = useMemo(() => {
-    // Map store inventory items to display format
-    // In a real app, we would fetch product details based on productId
     const storeItems: InventoryDisplayItem[] = inventory.map(item => ({
       id: item.id,
       productId: item.productId,
-      title: `Product ${item.productId}`, // Placeholder title
-      type: 'tool', // Default type
-      description: 'Purchased item',
+      title: `Sotib olingan ${item.productId}`,
+      type: 'tool',
+      description: 'Sizning shaxsiy resursingiz',
       purchasedAt: new Date(item.purchasedAt)
     }));
     return [...mockInventory, ...storeItems];
@@ -111,43 +108,45 @@ export default function InventoryPage() {
 
   return (
     <SuperAppLayout>
-      <div className="min-h-screen p-4">
+      <div className="min-h-screen bg-slate-950 pb-20 p-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
-              My Stuff
+          <div className="mb-8 text-center md:text-left">
+            <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
+              Mening Resurslarim
             </h1>
-            <p className="text-slate-400">Your purchased items and tools</p>
+            <p className="text-slate-500 text-sm italic">Sotib olingan barcha kitoblar, kinolar va vositalar.</p>
           </div>
 
           {/* Search and Filter */}
-          <div className="mb-6 space-y-4">
+          <div className="mb-8 space-y-4">
             {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
               <input
                 type="text"
-                placeholder="Search your items..."
+                placeholder="Resurslarni qidirish..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-800/50 rounded-lg border border-slate-700 focus:border-violet-500/50 focus:outline-none transition-colors"
+                className="w-full pl-12 pr-4 py-4 bg-slate-900/40 rounded-2xl border border-white/5 focus:border-violet-500/30 focus:outline-none transition-all placeholder:text-slate-600"
               />
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex gap-2 p-1 bg-slate-800/50 rounded-lg">
+            <div className="flex gap-2 p-1.5 bg-slate-900/60 rounded-2xl border border-white/5 overflow-x-auto no-scrollbar">
               {(['all', 'movies', 'books', 'tools'] as const).map((filterType) => (
                 <button
                   key={filterType}
                   onClick={() => setFilter(filterType)}
-                  className={`flex-1 py-2 px-4 rounded-md font-medium capitalize transition-all ${
+                  className={`flex-1 py-2.5 px-6 rounded-xl font-bold text-sm capitalize transition-all whitespace-nowrap ${
                     filter === filterType
-                      ? 'bg-violet-600 text-white'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/20'
+                      : 'text-slate-500 hover:text-slate-300'
                   }`}
                 >
-                  {filterType}
+                  {filterType === 'all' ? 'Hammasi' : 
+                   filterType === 'movies' ? 'Kinolar' :
+                   filterType === 'books' ? 'Kitoblar' : 'Asboblar'}
                 </button>
               ))}
             </div>
@@ -159,33 +158,35 @@ export default function InventoryPage() {
               {filteredItems.map((item: InventoryDisplayItem) => (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 hover:border-violet-500/50 transition-all"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  whileHover={{ y: -4 }}
+                  className="bg-slate-900/40 rounded-2xl p-5 border border-white/5 hover:border-violet-500/20 transition-all group"
                 >
-                  <div className="flex gap-4">
+                  <div className="flex gap-5">
                     {/* Icon */}
-                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${getTypeColor(item.type)} flex items-center justify-center text-white`}>
-                      {getTypeIcon(item.type)}
+                    <div className={`w-16 h-16 shrink-0 rounded-2xl bg-gradient-to-br ${getTypeColor(item.type)} flex items-center justify-center text-white shadow-inner`}>
+                      <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm border border-white/20">
+                        {getTypeIcon(item.type)}
+                      </div>
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
-                      <p className="text-slate-400 text-sm mb-2">{item.description}</p>
+                    <div className="flex-1 flex flex-col">
+                      <h3 className="font-bold text-lg text-slate-100 group-hover:text-violet-400 transition-colors">{item.title}</h3>
+                      <p className="text-slate-500 text-xs mb-4 line-clamp-1 italic">{item.description}</p>
                       
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs text-slate-500">
-                          {item.duration && <span>{item.duration}</span>}
-                          {item.pages && <span>{item.pages} pages</span>}
-                          <span>Purchased {item.purchasedAt.toLocaleDateString()}</span>
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                          <Calendar className="w-3 h-3" />
+                          <span>{item.purchasedAt.toLocaleDateString()}</span>
                         </div>
                         
                         <button
                           onClick={() => handleOpen(item)}
-                          className="px-3 py-1 bg-violet-600 rounded-md text-sm font-medium hover:bg-violet-700 transition-colors"
+                          className="px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold text-slate-200 border border-white/5 transition-all active:scale-95"
                         >
-                          Open
+                          Ochish
                         </button>
                       </div>
                     </div>
@@ -194,33 +195,37 @@ export default function InventoryPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-10 h-10 text-slate-600" />
+            <div className="text-center py-24 bg-slate-900/20 rounded-3xl border border-dashed border-white/5">
+              <div className="w-24 h-24 bg-slate-900/60 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Search className="w-10 h-10 text-slate-700" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">No items found</h3>
-              <p className="text-slate-400">
-                {searchQuery ? 'Try adjusting your search' : 'Start by exploring the Hub'}
+              <h3 className="text-xl font-bold text-slate-400 mb-2">Hech narsa topilmadi</h3>
+              <p className="text-slate-600 text-sm max-w-xs mx-auto italic">
+                {searchQuery ? 'Qidiruv bo\'yicha resurslar mavjud emas' : 'Hali hech qanday resurs sotib olmagansiz'}
               </p>
             </div>
           )}
 
-          {/* History Section */}
-          <div className="mt-12">
-            <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
-            <div className="space-y-2">
-              <div className="p-3 bg-slate-800/30 rounded-lg text-sm text-slate-400">
-                <span className="text-white">Played 2048</span> - Earned 5.5 coins
-                <span className="float-right">2 hours ago</span>
-              </div>
-              <div className="p-3 bg-slate-800/30 rounded-lg text-sm text-slate-400">
-                <span className="text-white">Generated PDF Quiz</span> - Used 10 energy
-                <span className="float-right">5 hours ago</span>
-              </div>
-              <div className="p-3 bg-slate-800/30 rounded-lg text-sm text-slate-400">
-                <span className="text-white">Purchased &quot;Quantum Paradox&quot;</span> - 50 coins
-                <span className="float-right">Yesterday</span>
-              </div>
+          {/* History Section - Optional refresh */}
+          <div className="mt-16">
+            <h2 className="text-lg font-bold text-slate-400 mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+              Oxirgi harakatlar
+            </h2>
+            <div className="space-y-3">
+              {[
+                { act: "2048 o'ynadi", reward: "+5.5 tanga", time: "2 soat oldin" },
+                { act: "AI Test yaratdi", reward: "-30 tanga", time: "5 soat oldin" },
+                { act: "Premium sotib oldi", reward: "Faol", time: "Kecha" },
+              ].map((item, i) => (
+                <div key={i} className="p-4 bg-slate-900/40 rounded-2xl border border-white/5 text-xs flex justify-between items-center">
+                  <span className="text-slate-300 font-medium">{item.act}</span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-emerald-400 font-bold">{item.reward}</span>
+                    <span className="text-slate-600 italic">{item.time}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

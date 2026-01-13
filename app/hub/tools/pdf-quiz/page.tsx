@@ -1,249 +1,189 @@
 "use client";
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, FileUp, Shield, Zap, CheckCircle2, Loader2, AlertCircle, ChevronRight, FileText } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import SuperAppLayout from '@/components/SuperAppLayout';
-import { useSecureEconomyStore } from '@/stores/secureEconomyStore';
-import { motion } from 'framer-motion';
-import { Upload, FileText, Zap, CheckCircle, AlertCircle } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
-import { spendCoins } from '@/actions/economy';
+import { QuantumCard, QuantumButton } from '@/components/quantum-effects';
+import { useEconomyStore } from '@/stores/economyStore';
 
-interface QuizQuestion {
-  id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
-
-export default function PDFQuizPage() {
-  const { coins, refreshBalance } = useSecureEconomyStore();
+export default function PdfQuizPage() {
+  const router = useRouter();
+  const { coins, spendCoins } = useEconomyStore();
   const [file, setFile] = useState<File | null>(null);
-  const [processing, setProcessing] = useState(false);
-  const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [score, setScore] = useState(0);
-  const [showResults, setShowResults] = useState(false);
-  const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [step, setStep] = useState<'upload' | 'processing' | 'ready'>('upload');
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: { 'application/pdf': ['.pdf'] },
-    onDrop: (acceptedFiles) => {
-      const uploadedFile = acceptedFiles[0];
-      if (uploadedFile) {
-        setFile(uploadedFile);
-        setQuiz([]);
-        setCurrentQuestion(0);
-        setScore(0);
-        setShowResults(false);
-        setSelectedAnswers([]);
-      }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
     }
-  });
+  };
 
-  const generateQuiz = async () => {
-    if (!file || coins < 10) return;
-
-    setProcessing(true);
+  const startProcessing = () => {
+    if (!file || coins < 50) return;
     
-    try {
-      // Extract text from PDF (in real app, use pdf-parse)
-      const text = "Sample PDF text content";
-      
-      // Call API to generate quiz
-      const response = await fetch('/api/quiz/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          text,
-          telegramId: "123456789" // Convert to string for JSON
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setQuiz(data.questions);
-        await refreshBalance("123456789"); // Refresh balance after spending
-      }
-    } catch (error) {
-      console.error('Failed to generate quiz:', error);
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const handleAnswer = (answerIndex: number) => {
-    const newAnswers = [...selectedAnswers];
-    newAnswers[currentQuestion] = answerIndex;
-    setSelectedAnswers(newAnswers);
-
-    if (answerIndex === quiz[currentQuestion].correctAnswer) {
-      setScore(score + 1);
-    }
-
-    if (currentQuestion < quiz.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      setShowResults(true);
-    }
-  };
-
-  const resetQuiz = () => {
-    setCurrentQuestion(0);
-    setScore(0);
-    setShowResults(false);
-    setSelectedAnswers([]);
+    spendCoins(50);
+    setIsUploading(true);
+    setStep('processing');
+    
+    // Simulate processing
+    setTimeout(() => {
+      setIsUploading(false);
+      setStep('ready');
+    }, 3000);
   };
 
   return (
     <SuperAppLayout>
-      <div className="min-h-screen p-4">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
-              PDF to Quiz Converter
-            </h1>
-            <p className="text-slate-400">Upload a PDF and generate an interactive quiz</p>
+      <div className="min-h-screen bg-slate-950 pb-20">
+        {/* Header */}
+        <div className="bg-slate-900/50 backdrop-blur-lg border-b border-white/10 p-4 sticky top-0 z-50">
+          <div className="max-w-2xl mx-auto flex items-center gap-4">
+            <button onClick={() => router.back()} className="text-slate-400 hover:text-white transition-colors">
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <h1 className="text-xl font-bold">PDF dan Test</h1>
           </div>
+        </div>
 
-          {/* Coins Status */}
-          <div className="flex items-center gap-2 mb-6 p-3 bg-slate-800/50 rounded-lg border border-violet-500/20">
-            <Zap className="w-5 h-5 text-yellow-400" />
-            <span className="text-sm">Coins: {coins}</span>
-            {coins < 10 && (
-              <span className="text-xs text-red-400 ml-auto">Not enough coins (requires 10)</span>
-            )}
-          </div>
-
-          {/* Upload Section */}
-          {!quiz.length && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6"
-            >
-              <div {...getRootProps()}
-                className="border-2 border-dashed border-violet-500/30 rounded-xl p-8 text-center cursor-pointer hover:border-violet-400/50 transition-colors bg-slate-800/30"
+        <div className="max-w-2xl mx-auto p-4 py-8">
+          <AnimatePresence mode="wait">
+            {step === 'upload' && (
+              <motion.div
+                key="upload"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-6"
               >
-                {file ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <FileText className="w-12 h-12 text-violet-400" />
-                    <div>
-                      <p className="font-medium">{file.name}</p>
-                      <p className="text-slate-400 text-sm">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        generateQuiz();
-                      }}
-                      disabled={processing || coins < 10}
-                      className="px-6 py-2 bg-gradient-to-r from-violet-600 to-cyan-600 rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {processing ? 'Processing...' : 'Generate Quiz'}
-                    </button>
+                <div className="text-center mb-10">
+                  <div className="w-20 h-20 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
+                    <FileUp className="w-10 h-10 text-blue-400" />
                   </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-3">
-                    <Upload className="w-12 h-12 text-slate-400" />
-                    <div>
-                      <p className="font-medium mb-1">Click to upload PDF</p>
-                      <p className="text-slate-400 text-sm">Maximum file size: 10MB</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <input {...getInputProps()} />
-            </motion.div>
-          )}
-
-          {/* Processing State */}
-          {processing && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-12"
-            >
-              <div className="inline-flex items-center gap-3 px-6 py-3 bg-slate-800/50 rounded-full">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                >
-                  <Zap className="w-5 h-5 text-yellow-400" />
-                </motion.div>
-                <span>Processing PDF and generating quiz...</span>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Quiz Section */}
-          {quiz.length > 0 && !showResults && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="mb-4 flex justify-between items-center">
-                <span className="text-sm text-slate-400">
-                  Question {currentQuestion + 1} of {quiz.length}
-                </span>
-                <span className="text-sm font-medium">
-                  Score: {score}/{currentQuestion}
-                </span>
-              </div>
-
-              <div className="bg-slate-800/50 rounded-xl p-6 mb-6">
-                <h3 className="text-lg font-semibold mb-4">
-                  {quiz[currentQuestion].question}
-                </h3>
-
-                <div className="space-y-3">
-                  {quiz[currentQuestion].options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleAnswer(index)}
-                      className="w-full text-left p-4 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-colors border border-slate-600/50 hover:border-violet-500/50"
-                    >
-                      <span className="font-medium mr-3">{String.fromCharCode(65 + index)}.</span>
-                      {option}
-                    </button>
-                  ))}
+                  <h2 className="text-3xl font-bold mb-2">PDF yuklang</h2>
+                  <p className="text-slate-400">Har qanday o'quv qo'llanma yoki kitobni interaktiv testga aylantiring.</p>
                 </div>
-              </div>
-            </motion.div>
-          )}
 
-          {/* Results */}
-          {showResults && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center"
-            >
-              <div className="mb-6">
-                {score >= quiz.length * 0.8 ? (
-                  <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                ) : (
-                  <AlertCircle className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
-                )}
-                <h2 className="text-2xl font-bold mb-2">Quiz Complete!</h2>
-                <p className="text-3xl font-bold text-cyan-400">
-                  {score}/{quiz.length}
-                </p>
-                <p className="text-slate-400">
-                  {score >= quiz.length * 0.8 ? 'Excellent work!' : 'Good effort!'}
-                </p>
-              </div>
+                <div className="bg-slate-900/50 p-4 rounded-xl border border-blue-500/20 flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <Zap className="w-5 h-5 text-yellow-400" />
+                    <span className="text-sm font-medium">Narxi: 50 tanga</span>
+                  </div>
+                  <span className={`text-xs ${coins < 50 ? 'text-red-400' : 'text-slate-500'}`}>
+                    Sizda: {coins} tanga
+                  </span>
+                </div>
 
-              <button
-                onClick={resetQuiz}
-                className="px-6 py-3 bg-gradient-to-r from-violet-600 to-cyan-600 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                <QuantumCard className="p-8 border-dashed border-2 border-slate-700 hover:border-blue-500/50 transition-all group relative">
+                  <label className="flex flex-col items-center justify-center cursor-pointer">
+                    <input type="file" accept=".pdf" className="hidden" onChange={handleFileChange} />
+                    <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <FileUp className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <span className="text-lg font-medium text-slate-300 text-center">
+                      {file ? file.name : 'Faylni tanlang yoki shu yerga tashlang'}
+                    </span>
+                    <span className="text-sm text-slate-500 mt-2">Maksimal hajm: 20MB</span>
+                  </label>
+                </QuantumCard>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                  <div className="bg-slate-900/50 p-4 rounded-2xl border border-white/5 flex gap-3">
+                    <Shield className="w-5 h-5 text-blue-400 shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-bold">Xavfsiz va Maxfiy</h4>
+                      <p className="text-xs text-slate-500">Sizning fayllaringiz faqat test yaratish uchun ishlatiladi.</p>
+                    </div>
+                  </div>
+                  <div className="bg-slate-900/50 p-4 rounded-2xl border border-white/5 flex gap-3">
+                    <Zap className="w-5 h-5 text-amber-400 shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-bold">Tezkor Generatsiya</h4>
+                      <p className="text-xs text-slate-500">AI bir necha soniya ichida murakkab testlarni tayyorlaydi.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <QuantumButton 
+                  disabled={!file || coins < 50} 
+                  className="w-full py-4 text-lg mt-8 shadow-lg shadow-blue-500/20"
+                  onClick={startProcessing}
+                >
+                  {coins < 50 ? 'Tanga yetarli emas' : 'Test yaratishni boshlash'}
+                </QuantumButton>
+              </motion.div>
+            )}
+
+            {step === 'processing' && (
+              <motion.div
+                key="processing"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.05 }}
+                className="flex flex-col items-center justify-center py-20 text-center"
               >
-                Try Another Quiz
-              </button>
-            </motion.div>
-          )}
+                <div className="relative mb-8">
+                  <div className="w-24 h-24 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                  <FileUp className="w-10 h-10 text-blue-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Tahlil qilinmoqda...</h2>
+                <p className="text-slate-400 max-w-xs mx-auto">
+                  AI PDF faylni o'qib chiqmoqda va eng muhim savollarni saralamoqda.
+                </p>
+              </motion.div>
+            )}
+
+            {step === 'ready' && (
+              <motion.div
+                key="ready"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6 text-center"
+              >
+                <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/20">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+                </div>
+                <h2 className="text-3xl font-bold mb-2">Tayyor!</h2>
+                <p className="text-slate-400">PDF asosida 15 ta test savoli muvaffaqiyatli yaratildi.</p>
+                
+                <QuantumCard className="p-6 text-left space-y-4 mt-8">
+                  <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                    <span className="text-slate-400 text-sm">Fayl:</span>
+                    <span className="text-slate-200 font-medium truncate max-w-[200px] text-sm">{file?.name}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                    <span className="text-slate-400 text-sm">Savollar soni:</span>
+                    <span className="text-slate-200 font-medium text-sm">15 ta</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400 text-sm">Qiyinlik:</span>
+                    <span className="text-blue-400 font-medium uppercase tracking-wider text-xs italic">O'rtacha</span>
+                  </div>
+                </QuantumCard>
+
+                <div className="flex gap-4 mt-8">
+                  <QuantumButton 
+                    variant="secondary" 
+                    className="flex-1"
+                    onClick={() => setStep('upload')}
+                  >
+                    Qayta yuklash
+                  </QuantumButton>
+                  <QuantumButton 
+                    className="flex-1"
+                    onClick={() => router.push('/quiz')}
+                  >
+                    Boshlash
+                  </QuantumButton>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </SuperAppLayout>
   );
 }
+

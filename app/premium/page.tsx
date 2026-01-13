@@ -1,200 +1,165 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ChevronLeft, Crown, Check, Zap, Star, Shield, Lock, ArrowRight } from 'lucide-react';
-import { QuantumButton, QuantumCard } from '@/components/quantum-effects';
 import { motion } from 'framer-motion';
+import { ArrowLeft, Check, Sparkles, Video, FileText, Monitor, BarChart, Settings, Star } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import SuperAppLayout from '@/components/SuperAppLayout';
-import { useEconomyStore } from '@/stores/economyStore';
 
 export default function PremiumPage() {
   const router = useRouter();
-  const { isPremium, setPremium } = useEconomyStore();
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [showTrialSuccess, setShowTrialSuccess] = useState(false);
-  const [processing, setProcessing] = useState(false);
 
   const features = [
-    "Unlimited AI Quiz Generations",
-    "Access to Exclusive Books & Movies",
-    "Ad-free Experience",
-    "Premium Profile Badge",
-    "2x XP & Gold Earnings",
-    "Priority Support"
+    { icon: Video, text: "Cheksiz videodan testlar" },
+    { icon: FileText, text: "Cheksiz PDFdan testlar" },
+    { icon: Monitor, text: "Cheksiz AI prezentatsiyalar" },
+    { icon: BarChart, text: "Premium statistika va maslaxatlar" },
+    { icon: Settings, text: "Savollar sonini tanlash" },
+    { icon: Sparkles, text: "Yuqori sifatli testlar" },
   ];
 
-  const handleTrialActivate = () => {
-    // Simulate activation
-    localStorage.setItem('nexus_trial_active', 'true');
-    localStorage.setItem('nexus_trial_expiry', new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()); // 3 days
-    
-    setShowTrialSuccess(true);
-    setTimeout(() => {
-      router.push('/game');
-    }, 2000);
+  const plans = [
+    {
+      duration: "1 kunlik Premium",
+      description: "Premium imkoniyatlarni sinab ko'ring",
+      price: "8 000 UZS",
+      fire: "2 kishi bugun sotib oldi",
+      popular: false,
+      color: "from-blue-600 to-violet-600"
+    },
+    {
+      duration: "7 kunlik Premium",
+      description: "52% tejash • Bir hafta uchun",
+      price: "29 000 UZS",
+      oldPrice: "60 900 UZS",
+      discount: "52% chegirma",
+      popular: true,
+      color: "from-orange-500 to-pink-500"
+    },
+    {
+      duration: "1 oylik Premium",
+      description: "77% tejash • Bir oy cheksiz",
+      price: "60 000 UZS",
+      oldPrice: "261 000 UZS",
+      discount: "77% chegirma",
+      bestValue: true,
+      color: "from-violet-600 to-purple-600"
+    }
+  ];
+
+  const handlePurchase = (plan: any) => {
+    // Redirect to Telegram bot for payment
+    window.open(`https://t.me/nexus_support_bot?start=pay_${plan.duration.replace(/\s/g, '_')}`, '_blank');
   };
 
-  const handleSubscribe = () => {
-    // Redirect to @polway_bot for payment processing
-    window.open('https://t.me/polway_bot?start=premium_payment', '_blank');
+  const handleSendCheck = () => {
+    window.open('https://t.me/nexus_support_bot?start=send_receipt', '_blank');
   };
-
-  if (isPremium) {
-    return (
-      <SuperAppLayout>
-        <div className="min-h-screen p-4">
-          <div className="max-w-2xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-12"
-            >
-              <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Crown className="w-10 h-10 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                You&apos;re Premium!
-              </h1>
-              <p className="text-slate-400 mb-8">
-                Enjoy all the exclusive benefits and features
-              </p>
-              <QuantumButton onClick={() => router.push('/game')} className="mx-auto">
-                Back to App
-              </QuantumButton>
-            </motion.div>
-          </div>
-        </div>
-      </SuperAppLayout>
-    );
-  }
 
   return (
     <SuperAppLayout>
-      <div className="min-h-screen bg-slate-950 p-4 pb-20 md:pb-4 flex flex-col items-center">
-      {/* Header */}
-      <div className="w-full max-w-4xl flex items-center gap-4 mb-8 pt-4">
-        <QuantumButton onClick={() => router.back()} size="sm" variant="secondary">
-          <ChevronLeft className="w-5 h-5" />
-        </QuantumButton>
-        <h1 className="text-2xl font-bold text-white">Premium Access</h1>
-      </div>
-
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
-        
-        {/* Value Proposition */}
-        <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-left"
-          >
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent mb-4">
-              Unlock the Full Power of Nexus
-            </h2>
-            <p className="text-slate-400 text-lg">
-              Join the elite operatives and gain access to advanced neural tools, unlimited resources, and exclusive content.
-            </p>
-          </motion.div>
-
-          <div className="space-y-4">
-            {features.map((feature, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800"
-              >
-                <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                  <Check className="w-5 h-5 text-yellow-500" />
-                </div>
-                <span className="text-slate-200">{feature}</span>
-              </motion.div>
-            ))}
+      <div className="min-h-screen bg-slate-950 pb-20">
+        {/* Header */}
+        <div className="bg-slate-900/50 backdrop-blur-lg border-b border-white/10 p-4 sticky top-0 z-50">
+          <div className="max-w-md mx-auto flex items-center gap-4">
+            <button onClick={() => router.back()} className="text-slate-400 hover:text-white">
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <h1 className="text-xl font-bold">Premium sotib olish</h1>
           </div>
         </div>
 
-        {/* Pricing Card */}
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-red-500 blur-3xl opacity-20" />
-          <QuantumCard glowColor="gold" className="relative p-8 h-full flex flex-col">
-            <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30">
-                <Crown className="w-10 h-10 text-white" />
+        <div className="max-w-md mx-auto p-4 space-y-6">
+          {/* Features List */}
+          <div className="bg-slate-900/50 rounded-2xl p-6 border border-white/10 space-y-4">
+            {features.map((feature, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20`}>
+                  <feature.icon className="w-5 h-5 text-violet-400" />
+                </div>
+                <span className="flex-1 text-sm font-medium text-slate-200">{feature.text}</span>
+                <Check className="w-5 h-5 text-green-400" />
               </div>
-            </div>
+            ))}
+          </div>
 
-            <div className="text-center mb-8">
-              <div className="inline-flex bg-slate-800 p-1 rounded-full mb-6">
-                <button
-                  onClick={() => setSelectedPlan('monthly')}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedPlan === 'monthly' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setSelectedPlan('yearly')}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedPlan === 'yearly' ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Yearly (-20%)
-                </button>
-              </div>
-
-              <div className="flex items-baseline justify-center gap-1 mb-2">
-                <span className="text-4xl font-bold text-white">
-                  {selectedPlan === 'monthly' ? '24,990' : '249,900'}
-                </span>
-                <span className="text-slate-400">UZS</span>
-              </div>
-              <p className="text-slate-500 text-sm">
-                {selectedPlan === 'monthly' ? 'per month' : 'per year'}
-              </p>
-            </div>
-
-            <div className="mt-auto space-y-4">
-              <QuantumButton 
-                onClick={handleSubscribe}
-                disabled={processing}
-                className="w-full justify-center py-4 text-lg"
+          {/* Plans */}
+          <div className="space-y-4">
+            {plans.map((plan, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className={`relative overflow-hidden rounded-2xl border ${
+                  plan.popular ? 'border-orange-500/50 bg-slate-900/80' : 
+                  plan.bestValue ? 'border-violet-500/50 bg-slate-900/80' : 
+                  'border-white/10 bg-slate-900/50'
+                } p-6`}
               >
-                {processing ? 'Processing...' : (
-                  <>
-                    Upgrade Now
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
+                {/* Popular Badge */}
+                {plan.popular && (
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-lg shadow-orange-500/20">
+                    🔥 MASHHUR 🔥
+                  </div>
                 )}
-              </QuantumButton>
-              
-              <div className="relative pt-4 border-t border-slate-800">
-                <p className="text-center text-xs text-slate-400 mb-3">
-                  New user? Try before you buy.
-                </p>
-                <button
-                  onClick={handleTrialActivate}
-                  disabled={showTrialSuccess}
-                  className="w-full py-3 rounded-xl border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 font-medium hover:bg-yellow-500/20 transition-all flex items-center justify-center gap-2"
-                >
-                  {showTrialSuccess ? (
-                    <>
-                      <Check className="w-4 h-4" /> Trial Activated!
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="w-4 h-4" /> Activate 3-Day Free Trial
-                    </>
+
+                {/* Best Value Badge */}
+                {plan.bestValue && (
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-lg shadow-blue-500/20">
+                    💎 ENG YAXSHI NARX
+                  </div>
+                )}
+
+                <h3 className="text-lg font-bold mb-1">{plan.duration}</h3>
+                <p className="text-slate-400 text-sm mb-4">{plan.description}</p>
+
+                {/* Fire Notification */}
+                {plan.fire && (
+                  <div className="mb-4 bg-orange-500/10 border border-orange-500/20 rounded-lg p-2 flex items-center gap-2">
+                    <span className="text-orange-400 animate-pulse">🔥</span>
+                    <span className="text-orange-400 text-sm font-medium">{plan.fire}</span>
+                  </div>
+                )}
+
+                <div className="mb-6">
+                  <div className="text-3xl font-bold">{plan.price}</div>
+                  {plan.oldPrice && (
+                    <div className="text-sm text-slate-500 mt-1">
+                      <span className="line-through">{plan.oldPrice}</span>
+                      <span className="ml-2 text-green-400 font-bold">{plan.discount}</span>
+                    </div>
                   )}
+                </div>
+
+                <button
+                  onClick={() => handlePurchase(plan)}
+                  className={`w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r ${plan.color} hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg`}
+                >
+                  Sotib olish
+                  <div className="bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded border border-white/30">CLICK</div>
                 </button>
-              </div>
-            </div>
-          </QuantumCard>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="pt-4 border-t border-white/5">
+            <button
+              onClick={handleSendCheck}
+              className="w-full py-3 px-4 rounded-xl bg-slate-800/50 border border-white/10 text-slate-300 text-sm font-medium hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              To'lov chekini yuborish
+            </button>
+          </div>
+
+          <p className="text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+            💡 Maslahat: Sifatli PDF fayllar mukammal savollar beradi.
+          </p>
         </div>
-      </div>
       </div>
     </SuperAppLayout>
   );
 }
+
