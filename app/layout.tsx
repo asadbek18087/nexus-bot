@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
+import CopilotWidget from '@/components/copilot-widget'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${inter.className} bg-slate-950 text-white`}>
         {children}
+        <CopilotWidget />
         <Toaster
           position="top-right"
           toastOptions={{
