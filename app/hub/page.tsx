@@ -23,13 +23,28 @@ import {
   Gift,
   Layers,
   Info,
-  Gamepad2
+  Gamepad2,
+  Flame,
+  Clock
 } from 'lucide-react';
 
 export default function HubPage() {
   const { coins, addCoins } = useEconomyStore();
   const { addNotification } = useNotificationStore();
   const [showDailyBonus, setShowDailyBonus] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({ h: 2, m: 14, s: 59 });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev.s > 0) return { ...prev, s: prev.s - 1 };
+        if (prev.m > 0) return { ...prev, m: prev.m - 1, s: 59 };
+        if (prev.h > 0) return { ...prev, h: prev.h - 1, m: 59, s: 59 };
+        return prev;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     // Onboarding check
@@ -147,10 +162,17 @@ export default function HubPage() {
               <div className="flex gap-4 items-center">
                 <div className="bg-slate-800/50 p-3 rounded-xl border border-white/5 relative">
                   <BrainCircuit className="w-6 h-6 text-violet-400" />
-                  <span className="absolute -top-1 -right-1 bg-violet-600 text-[8px] font-bold px-1.5 py-0.5 rounded-full text-white border border-slate-950">NEW</span>
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-[8px] font-bold px-1.5 py-0.5 rounded-full text-white border border-slate-950 flex items-center gap-0.5">
+                    <Flame className="w-2 h-2" fill="currentColor" /> HOT
+                  </span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-100">AI Test Yaratish</h3>
+                  <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+                    AI Test Yaratish
+                    <span className="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded uppercase font-bold tracking-wide">
+                      3 ta joy qoldi
+                    </span>
+                  </h3>
                   <p className="text-slate-500 text-xs">Istalgan mavzuda test yarating.</p>
                 </div>
               </div>
@@ -256,8 +278,27 @@ export default function HubPage() {
             </Link>
           </div>
 
+          {/* Flash Sale Banner */}
+          <div className="mt-8 mb-4 bg-gradient-to-r from-red-900/40 to-orange-900/40 border border-red-500/30 rounded-2xl p-4 flex items-center justify-between relative overflow-hidden">
+             <div className="absolute inset-0 bg-red-500/5 animate-pulse" />
+             <div className="relative z-10 flex items-center gap-3">
+              <div className="bg-red-500/20 p-2.5 rounded-xl">
+                <Flame className="w-5 h-5 text-red-500" fill="currentColor" />
+              </div>
+              <div>
+                <h3 className="font-black text-red-400 text-sm uppercase tracking-wide">Flash Sale</h3>
+                <p className="text-xs text-red-200/60 font-medium">Premium uchun -50% chegirma</p>
+              </div>
+            </div>
+            <div className="relative z-10 flex items-center gap-1 font-mono font-bold text-xl text-white bg-black/30 px-3 py-1 rounded-lg border border-white/10">
+              <span>{String(timeLeft.h).padStart(2, '0')}</span>:
+              <span>{String(timeLeft.m).padStart(2, '0')}</span>:
+              <span>{String(timeLeft.s).padStart(2, '0')}</span>
+            </div>
+          </div>
+
           {/* Premium Section - Re-enhanced */}
-          <div className="mt-10 relative overflow-hidden rounded-3xl bg-[#1e1b4b]/40 border border-violet-500/20 p-6">
+          <div className="relative overflow-hidden rounded-3xl bg-[#1e1b4b]/40 border border-violet-500/20 p-6">
             <div className="absolute top-0 right-0 p-2 opacity-10">
               <Star className="w-24 h-24 text-amber-400" />
             </div>
