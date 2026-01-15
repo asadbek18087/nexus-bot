@@ -262,3 +262,12 @@ create table if not exists "UserAchievement" (
   "earnedAt" timestamp with time zone default now(),
   unique("userId", "achievementId")
 );
+
+-- AI Chat History Table
+create table if not exists "AiChat" (
+  "id" uuid primary key default uuid_generate_v4(),
+  "userId" uuid not null references "User"("id") on delete cascade,
+  "message" text,
+  "response" text,
+  "createdAt" timestamp with time zone default now()
+);

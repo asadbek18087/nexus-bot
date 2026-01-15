@@ -14,7 +14,9 @@ import {
   ShieldCheck, 
   HelpCircle, 
   RotateCcw,
-  Target
+  Target,
+  Loader2,
+  Info
 } from 'lucide-react';
 import Link from 'next/link';
 import AIQuizGenerator from '@/components/ai-quiz-generator';
@@ -441,5 +443,4 @@ export default function QuizPage() {
   );
 }
 
-import { Loader2, HelpCircle, Info } from 'lucide-react';
 
