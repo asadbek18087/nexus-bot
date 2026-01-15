@@ -245,6 +245,7 @@ class Config:
     if "BOT_TOKEN" in os.environ:
         os.environ.pop("BOT_TOKEN", None)
     load_dotenv(Path(__file__).parent / ".env")
+    
     # HARDCODED CREDENTIALS (AS REQUESTED)
     BOT_TOKEN = "7483264783:AAGuaeeWXCYNx-NZe_0sFwcbHpBiJImapJM"
     ADMIN_IDS = [5895125141]
@@ -254,6 +255,15 @@ class Config:
     # 2. DATABASE SOZLAMALARI
     # ─────────────────────────────────────────────────────────────────────────
     DB_NAME = "mega_bot.db"
+    
+    # Supabase credentials (from user)
+    SUPABASE_URL = "https://fjbvkzwcptdkwuyqhptv.supabase.co"
+    SUPABASE_KEY = "sbp_100f89a0dee0e7ace0877585f4f49082f081df7a"
+    SUPABASE_DB_URL = "postgresql://postgres:Asadbek1807@db.fjbvkzwcptdkwuyqhptv.supabase.co:5432/postgres"
+    
+    # Railway Configuration
+    RAILWAY_PROJECT_ID = "3e3437c9-df48-4cac-a124-bfcfec4c27eb"
+    RAILWAY_TOKEN = "21855af5-fc2d-495d-9d12-fd27778922f4"
     
     # Termux yoki Windows muhitini aniqlash
     IS_TERMUX = os.path.exists("/data/data/com.termux/files/home")
