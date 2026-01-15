@@ -37,7 +37,7 @@ next-env.d.ts
 *.log
 SECRETS.md
 
-# Python / Bot artifacts
+# Python / Bot artifacts (Exclude from Web App)
 *.py
 *.pyc
 __pycache__/
@@ -46,3 +46,5 @@ __pycache__/
 *.zip
 venv/
 env/
+requirements.txt
+Procfile
