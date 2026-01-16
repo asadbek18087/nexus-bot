@@ -46,7 +46,7 @@ const nextConfig = {
   experimental: {
     // optimizeCss: true, // Disabled to fix critters error
     optimizePackageImports: ['lucide-react', 'framer-motion'],
-    // webpackBuildWorker: true, // Disabled to fix build worker error
+    webpackBuildWorker: true, // Enable to fix build worker warning
   },
   webpack: (config, { isServer, dev }) => {
     if (!isServer) {
