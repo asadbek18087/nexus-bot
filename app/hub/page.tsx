@@ -52,11 +52,9 @@ export default function HubPage() {
     if (!onboarded) {
       localStorage.setItem('nexus_onboarded', 'true');
       addNotification({
-        id: 'welcome',
         title: 'Nexus-ga xush kelibsiz! 🚀',
         message: 'Bilim olishni AI testlardan boshlang va tangalar yig\'ing.',
         type: 'info',
-        timestamp: new Date().toISOString()
       });
     }
 
