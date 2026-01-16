@@ -242,11 +242,16 @@ class Config:
     # ─────────────────────────────────────────────────────────────────────────
     # 1. ASOSIY SOZLAMALAR (Bot credentials)
     # ─────────────────────────────────────────────────────────────────────────
-    if "BOT_TOKEN" in os.environ:
-        os.environ.pop("BOT_TOKEN", None)
     load_dotenv(Path(__file__).parent / ".env")
-    # HARDCODED CREDENTIALS (AS REQUESTED)
-    BOT_TOKEN = "7483264783:AAGuaeeWXCYNx-NZe_0sFwcbHpBiJImapJM"
+    
+    # Check environment variables first (for Railway/Vercel deployment)
+    BOT_TOKEN = os.environ.get("BOT_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN") or "7483264783:AAG1POg7OfyocoyQMw1L25MB4A2_fVqbCJs"
+    
+    # Debug: Show which token is being used (masked)
+    if BOT_TOKEN.startswith("7483264783:"):
+        print(f"DEBUG: BOT_TOKEN loaded: 7483264783...{BOT_TOKEN[-10:]}")
+    else:
+        print(f"DEBUG: Invalid token format!")
     ADMIN_IDS = [5895125141]
     SUPPORT_USERNAME = "@iultimatium"
     
