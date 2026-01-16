@@ -286,7 +286,8 @@ export const QuantumCard: React.FC<{
   children: React.ReactNode;
   className?: string;
   glowColor?: 'purple' | 'blue' | 'green' | 'gold' | 'red';
-}> = ({ children, className = '', glowColor = 'purple' }) => {
+  onClick?: () => void;
+}> = ({ children, className = '', glowColor = 'purple', onClick }) => {
   const glowColors: Record<string, string> = {
     purple: 'shadow-purple-500/25 hover:shadow-purple-500/40',
     blue: 'shadow-blue-500/25 hover:shadow-blue-500/40',
@@ -300,6 +301,7 @@ export const QuantumCard: React.FC<{
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -5 }}
+      onClick={onClick}
       className={`relative bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6 transition-all duration-300 shadow-lg ${glowColors[glowColor]} ${className}`}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-xl pointer-events-none" />
