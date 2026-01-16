@@ -35334,7 +35334,22 @@ if __name__ == "__main__":
     print("Bot ishga tushmoqda...")
     
     try:
+        # Add timeout to prevent hanging
+        import signal
+        
+        def timeout_handler(signum, frame):
+            print("\n⏰ Bot ishga tushirish vaqti tugadi!")
+            sys.exit(1)
+        
+        # Set 30 second timeout for startup
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(30)
+        
         asyncio.run(main())
+        
+        # Cancel alarm after successful start
+        signal.alarm(0)
+        
     except KeyboardInterrupt:
         print("\n🛑 Bot to'xtatildi!")
     except Exception as e:
