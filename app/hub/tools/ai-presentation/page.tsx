@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Presentation, Sparkles, Layout, Image as ImageIcon, Zap, Loader2, Wand2, Monitor } from 'lucide-react';
+import { ArrowLeft, Presentation, Sparkles, Layout, Image as ImageIcon, Zap, Loader2, Wand2, Monitor, CheckCircle2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import SuperAppLayout from '@/components/SuperAppLayout';
 import { QuantumCard, QuantumButton } from '@/components/quantum-effects';
