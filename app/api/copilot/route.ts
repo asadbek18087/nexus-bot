@@ -6,9 +6,9 @@ export async function POST(req: Request) {
     const { message, history } = await req.json();
 
     // Check for Azure OpenAI credentials
-    const azureApiKey = process.env.AZURE_OPENAI_API_KEY;
-    const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT;
-    const azureDeployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME;
+    const azureApiKey = process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_KEY;
+    const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT || process.env.AZURE_LANGUAGE_ENDPOINT;
+    const azureDeployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o"; // Default deployment name if not specified
 
     // Check for standard OpenAI credentials
     const openAiApiKey = process.env.OPENAI_API_KEY;
