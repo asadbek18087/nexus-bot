@@ -247,7 +247,7 @@ export default function QuizPage() {
   const shareResult = () => {
     const correctAnswers = answers.filter((a, i) => a === questions[i]?.correctAnswer).length;
     const percentage = Math.round((correctAnswers / questions.length) * 100);
-    const text = `Men Nexus AI Quiz-da ${percentage}% natija qayd etdim! 🔥\nSiz ham o'zingizni sinab ko'ring: t.me/nexus_support_bot`;
+    const text = `Men Nexus AI Quiz-da ${percentage}% natija qayd etdim! 🔥\nSiz ham o'zingizni sinab ko'ring: t.me/polway_bot`;
     window.open(`https://t.me/share/url?url=${encodeURIComponent('https://nexus-web-app.vercel.app')}&text=${encodeURIComponent(text)}`, '_blank');
   };
 

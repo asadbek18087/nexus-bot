@@ -48,7 +48,7 @@ export default function CinemaPage() {
 
     setRedirecting(movieId);
     setTimeout(() => {
-      window.open(`https://t.me/NexusMediaBot?start=movie_${movieCode}`, '_blank');
+      window.open(`https://t.me/polway_bot?start=movie_${movieCode}`, '_blank');
       setRedirecting(null);
     }, 1500);
   };

@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
         result = {
           success: true,
           inviteCode,
-          inviteLink: `https://t.me/nexus_quantum_bot?start=${inviteCode}`,
+          inviteLink: `https://t.me/polway_bot?start=${inviteCode}`,
           message: 'Invitation sent successfully!'
         };
         break;

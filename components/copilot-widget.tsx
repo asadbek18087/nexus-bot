@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Sparkles, Bot, User, Loader2, Maximize2, Minimize2 } from 'lucide-react';
+import { MessageSquare, X, Send, Sparkles, Bot, User, Loader2, Maximize2, Minimize2, ExternalLink, Lock } from 'lucide-react';
 import { useEconomyStore } from '@/stores/economyStore';
+import Link from 'next/link';
 
 interface Message {
   id: string;
@@ -26,7 +27,7 @@ export default function CopilotWidget() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { coins, spendCoins } = useEconomyStore();
+  const { coins, spendCoins, isPremium } = useEconomyStore();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -37,11 +38,11 @@ export default function CopilotWidget() {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    if (coins < 5) {
+    if (!isPremium) {
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
         role: 'assistant',
-        content: 'Uzr, hisobingizda yetarli tanga mavjud emas. Har bir so\'rov 5 tanga turadi.',
+        content: 'Uzr, AI yordamchidan foydalanish uchun Premium talab qilinadi.',
         timestamp: new Date()
       }]);
       return;
@@ -57,7 +58,6 @@ export default function CopilotWidget() {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
-    spendCoins(5);
 
     try {
       const response = await fetch('/api/copilot', {
@@ -108,9 +108,19 @@ export default function CopilotWidget() {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm">Nexus Copilot</h3>
-                  <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
-                  </span>
+                  <div className="flex items-center gap-2">
+                     <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
+                    </span>
+                    <a 
+                      href="https://www.bing.com/copilotsearch?form=MA13XW" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-0.5"
+                    >
+                      Microsoft Copilot <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -164,28 +174,44 @@ export default function CopilotWidget() {
 
             {/* Input */}
             <div className="p-4 bg-slate-800 border-t border-slate-700 shrink-0">
-              <form 
-                onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                className="flex items-center gap-2 bg-slate-900 rounded-xl p-2 border border-slate-700 focus-within:border-violet-500/50 transition-colors"
-              >
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Xabar yozing..."
-                  className="flex-1 bg-transparent border-none outline-none text-white px-2 placeholder:text-slate-500"
-                />
-                <button 
-                  type="submit" 
-                  disabled={!input.trim() || isLoading}
-                  className="p-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:hover:bg-violet-600 rounded-lg text-white transition-colors"
-                >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                </button>
-              </form>
-              <div className="text-[10px] text-center mt-2 text-slate-500">
-                Har bir xabar: 5 tanga. Nexus AI xato qilishi mumkin.
-              </div>
+              {isPremium ? (
+                <>
+                  <form 
+                    onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+                    className="flex items-center gap-2 bg-slate-900 rounded-xl p-2 border border-slate-700 focus-within:border-violet-500/50 transition-colors"
+                  >
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Xabar yozing..."
+                      className="flex-1 bg-transparent border-none outline-none text-white px-2 placeholder:text-slate-500"
+                    />
+                    <button 
+                      type="submit" 
+                      disabled={!input.trim() || isLoading}
+                      className="p-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:hover:bg-violet-600 rounded-lg text-white transition-colors"
+                    >
+                      {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    </button>
+                  </form>
+                  <div className="text-[10px] text-center mt-2 text-slate-500">
+                    Premium foydalanuvchilar uchun cheksiz AI yordamchi.
+                  </div>
+                </>
+              ) : (
+                <div className="text-center space-y-3 py-2">
+                  <div className="flex flex-col items-center gap-2 text-slate-400 text-sm">
+                    <Lock className="w-5 h-5 text-amber-400" />
+                    <span>AI yordamchi faqat Premium uchun</span>
+                  </div>
+                  <Link href="/premium" className="block w-full">
+                    <button className="w-full py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold rounded-lg text-xs transition-all shadow-lg shadow-amber-500/20">
+                      Premiumga o'tish
+                    </button>
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

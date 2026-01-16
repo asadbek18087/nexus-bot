@@ -49,7 +49,7 @@ export default function LibraryPage() {
 
     setRedirecting(bookId);
     setTimeout(() => {
-      window.open(`https://t.me/NexusMediaBot?start=book_${bookCode}`, '_blank');
+      window.open(`https://t.me/polway_bot?start=book_${bookCode}`, '_blank');
       setRedirecting(null);
     }, 1500);
   };

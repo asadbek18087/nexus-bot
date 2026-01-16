@@ -31,8 +31,8 @@ export default function BuyCoinsPage() {
   const [selectedPackage, setSelectedPackage] = useState<string>('large');
 
   const handlePurchase = (pkg: CoinPackage) => {
-    // Redirect to @nexus_support_bot for payment processing
-    window.open(`https://t.me/nexus_support_bot?start=buy_coins_${pkg.id}`, '_blank');
+    // Redirect to @polway_bot for payment processing
+    window.open(`https://t.me/polway_bot?start=buy_coins_${pkg.id}`, '_blank');
   };
 
   return (

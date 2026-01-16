@@ -14,30 +14,30 @@ datasource db {
 
 model User {
   id              String   @id @default(uuid())
-  telegramId      BigInt   @unique
+  telegramId      BigInt   @unique @map("telegram_id")
   username        String?
-  fullName        String?
+  fullName        String?  @map("full_name")
   phone           String?
   email           String?
   language        String   @default("uz")
-  joinedAt        DateTime @default(now())
+  joinedAt        DateTime @default(now()) @map("joined_at")
   
   // Economy & Status
   coins           Int      @default(0)      // Balance/Gold
   xp              Int      @default(100)
   level           Int      @default(1)
   energy          Int      @default(100)
-  isPremium       Boolean  @default(false)
-  subscriptionType Int     @default(0) // 0=Free, 1=Trial, 2=Premium, etc.
-  subscriptionEnd DateTime?
+  isPremium       Boolean  @default(false) @map("is_premium")
+  subscriptionType Int     @default(0) @map("subscription_type") // 0=Free, 1=Trial, 2=Premium
+  subscriptionEnd DateTime? @map("subscription_end")
   
   // Activity Stats
-  totalDownloads  Int      @default(0)
-  dailyDownloads  Int      @default(0)
-  dailyAiUsage    Int      @default(0)
-  aiLimit         Int      @default(3)
-  lastActive      DateTime @default(now())
-  streakCount     Int      @default(0)
+  totalDownloads  Int      @default(0) @map("total_downloads")
+  dailyDownloads  Int      @default(0) @map("daily_downloads")
+  dailyAiUsage    Int      @default(0) @map("daily_ai_usage")
+  aiLimit         Int      @default(3) @map("ai_limit")
+  lastActive      DateTime @default(now()) @map("last_active")
+  streakCount     Int      @default(0) @map("streak_count")
   
   // Relations
   inventory       InventoryItem[]
@@ -52,8 +52,10 @@ model User {
   favorites       Favorite[]
   reviews         Review[]
   achievements    UserAchievement[]
+  aiChats         AiChat[]
   
   @@index([telegramId])
+  @@map("users")
 }
 
 // --- Media Content ---
@@ -61,7 +63,7 @@ model User {
 model Movie {
   id          String   @id @default(uuid())
   code        String?  @unique
-  fileId      String?
+  fileId      String?  @map("file_id")
   caption     String?
   title       String?
   genre       String?
@@ -71,68 +73,78 @@ model Movie {
   rating      Float    @default(0)
   views       Int      @default(0)
   downloads   Int      @default(0)
-  isActive    Boolean  @default(true)
-  uploadDate  DateTime @default(now())
+  isActive    Boolean  @default(true) @map("is_active")
+  uploadDate  DateTime @default(now()) @map("upload_date")
+
+  @@map("movies")
 }
 
 model Book {
   id          String   @id @default(uuid())
   code        String?  @unique
-  fileId      String?
+  fileId      String?  @map("file_id")
   title       String?
   author      String?
   genre       String?
-  fileType    String   @default("pdf")
+  fileType    String   @default("pdf") @map("file_type")
   description String?
   rating      Float    @default(0)
   views       Int      @default(0)
   downloads   Int      @default(0)
-  isActive    Boolean  @default(true)
-  uploadDate  DateTime @default(now())
+  isActive    Boolean  @default(true) @map("is_active")
+  uploadDate  DateTime @default(now()) @map("upload_date")
+
+  @@map("books")
 }
 
 model Podcast {
   id          String   @id @default(uuid())
   title       String
   description String?
-  fileId      String?
-  contentType String   @default("audio")
+  fileId      String?  @map("file_id")
+  contentType String   @default("audio") @map("content_type")
   category    String   @default("General")
   language    String   @default("uz")
   duration    Int?
   host        String?
-  isActive    Boolean  @default(true)
+  isActive    Boolean  @default(true) @map("is_active")
   views       Int      @default(0)
   downloads   Int      @default(0)
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("podcasts")
 }
 
-// --- Store & Inventory (Unified for Web App) ---
+// --- Store & Inventory ---
 
 model Product {
   id          String   @id @default(uuid())
   type        String   // "movie", "book", "tool_access"
   title       String
-  priceCoins  Int
-  fileId      String?
+  priceCoins  Int      @map("price_coins")
+  fileId      String?  @map("file_id")
   category    String?
   author      String?
   description String?
   rating      Float    @default(0)
   image       String?
   inventory   InventoryItem[]
+
+  @@map("products")
 }
 
 model InventoryItem {
   id          String   @id @default(uuid())
-  userId      String
-  productId   String
-  fileId      String?
+  userId      String   @map("user_id")
+  productId   String   @map("product_id")
+  fileId      String?  @map("file_id")
   status      String   @default("PENDING")
-  purchasedAt DateTime @default(now())
-  deliveredAt DateTime?
-  user        User     @relation(fields: [userId], references: [id])
-  product     Product  @relation(fields: [productId], references: [id])
+  purchasedAt DateTime @default(now()) @map("purchased_at")
+  deliveredAt DateTime? @map("delivered_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("inventory_items")
 }
 
 // --- Education (Academy) ---
@@ -144,176 +156,207 @@ model Course {
   author      String
   level       String
   duration    String
-  priceCoins  Int      @default(0)
+  priceCoins  Int      @default(0) @map("price_coins")
   image       String?
   modules     Module[]
   students    UserCourse[]
+
+  @@map("courses")
 }
 
 model Module {
   id          String   @id @default(uuid())
-  courseId    String
+  courseId    String   @map("course_id")
   title       String
   order       Int
-  course      Course   @relation(fields: [courseId], references: [id])
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessons     Lesson[]
+
+  @@map("modules")
 }
 
 model Lesson {
   id          String   @id @default(uuid())
-  moduleId    String
+  moduleId    String   @map("module_id")
   title       String
   content     String?
-  videoUrl    String?
+  videoUrl    String?  @map("video_url")
   duration    String?
   order       Int
-  module      Module   @relation(fields: [moduleId], references: [id])
+  module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@map("lessons")
 }
 
 model UserCourse {
   id          String   @id @default(uuid())
-  userId      String
-  courseId    String
+  userId      String   @map("user_id")
+  courseId    String   @map("course_id")
   progress    Int      @default(0)
   completed   Boolean  @default(false)
-  enrolledAt  DateTime @default(now())
-  lastAccess  DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
-  course      Course   @relation(fields: [courseId], references: [id])
+  enrolledAt  DateTime @default(now()) @map("enrolled_at")
+  lastAccess  DateTime @default(now()) @map("last_access")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
+  @@map("user_courses")
 }
 
 // --- Mining System ---
 
 model MiningFarm {
   id              String   @id @default(uuid())
-  userId          String   @unique
+  userId          String   @unique @map("user_id")
   level           Int      @default(1)
-  xpPerHour       Int      @default(10)
-  lastCollected   DateTime @default(now())
-  totalCollected  Int      @default(0)
-  user            User     @relation(fields: [userId], references: [id])
+  xpPerHour       Int      @default(10) @map("xp_per_hour")
+  lastCollected   DateTime @default(now()) @map("last_collected")
+  totalCollected  Int      @default(0) @map("total_collected")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("mining_farms")
 }
 
 // --- Quizzes ---
 
 model Quiz {
   id            String   @id @default(uuid())
-  userId        String
+  userId        String   @map("user_id")
   title         String
   topic         String?
   category      String   @default("General")
   difficulty    String   @default("medium")
   questions     String   // JSON
   score         Int      @default(0)
-  createdAt     DateTime @default(now())
-  user          User     @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now()) @map("created_at")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   attempts      QuizAttempt[]
+
+  @@map("quizzes")
 }
 
 model QuizAttempt {
   id            String   @id @default(uuid())
-  quizId        String
-  userId        String? // Optional linking
+  quizId        String   @map("quiz_id")
+  userId        String?  @map("user_id")
   score         Int
-  totalQuestions Int
-  createdAt     DateTime @default(now())
-  quiz          Quiz     @relation(fields: [quizId], references: [id])
+  totalQuestions Int     @map("total_questions")
+  createdAt     DateTime @default(now()) @map("created_at")
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_attempts")
 }
 
 // --- Payments & Economy ---
 
 model Payment {
   id          String   @id @default(uuid())
-  paymentId   String   @unique
-  userId      String
+  paymentId   String   @unique @map("payment_id")
+  userId      String   @map("user_id")
   amount      Int
   currency    String   @default("UZS")
   status      String   @default("pending")
   provider    String?
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
+  paymentMethod String? @map("payment_method")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
 }
 
 model PromoCode {
   id              String   @id @default(uuid())
   code            String   @unique
-  discountPercent Int      @default(0)
-  maxUses         Int      @default(1)
-  usedCount       Int      @default(0)
-  isActive        Boolean  @default(true)
+  discountPercent Int      @default(0) @map("discount_percent")
+  maxUses         Int      @default(1) @map("max_uses")
+  usedCount       Int      @default(0) @map("used_count")
+  isActive        Boolean  @default(true) @map("is_active")
+
+  @@map("promo_codes")
 }
 
 model Referral {
   id          String   @id @default(uuid())
-  referrerId  String
-  referredId  String   @unique
-  xpGained    Int      @default(0)
-  createdAt   DateTime @default(now())
-  referrer    User     @relation("Referrer", fields: [referrerId], references: [id])
-  referred    User     @relation("Referred", fields: [referredId], references: [id])
+  referrerId  String   @map("referrer_id")
+  referredId  String   @unique @map("referred_id")
+  xpGained    Int      @default(0) @map("xp_gained")
+  createdAt   DateTime @default(now()) @map("created_at")
+  referrer    User     @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred    User     @relation("Referred", fields: [referredId], references: [id], onDelete: Cascade)
+
+  @@map("referrals")
 }
 
 // --- Support & System ---
 
 model SupportTicket {
   id          String   @id @default(uuid())
-  ticketId    String   @unique
-  userId      String
+  ticketId    String   @unique @map("ticket_id")
+  userId      String   @map("user_id")
   category    String
   message     String
   status      String   @default("open")
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("support_tickets")
 }
 
 model ActivityHistory {
   id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   action    String
   details   String?
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("activity_history")
 }
 
 model Favorite {
   id          String   @id @default(uuid())
-  userId      String
-  itemType    String   // "movie", "book"
-  itemId      String
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
+  userId      String   @map("user_id")
+  itemType    String   @map("item_type") // "movie", "book"
+  itemId      String   @map("item_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, itemType, itemId])
+  @@map("favorites")
 }
 
 model Review {
   id          String   @id @default(uuid())
-  userId      String
-  itemType    String
-  itemId      String
+  userId      String   @map("user_id")
+  itemType    String   @map("item_type")
+  itemId      String   @map("item_id")
   rating      Int
   comment     String?
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
 }
 
 model UserAchievement {
   id            String   @id @default(uuid())
-  userId        String
-  achievementId String
-  earnedAt      DateTime @default(now())
-  user          User     @relation(fields: [userId], references: [id])
+  userId        String   @map("user_id")
+  achievementId String   @map("achievement_id")
+  earnedAt      DateTime @default(now()) @map("earned_at")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@unique([userId, achievementId])
+  @@map("user_achievements")
 }
 
 model AiChat {
   id        String   @id @default(uuid())
-  userId    String
+  userId    String   @map("user_id")
   message   String
   response  String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ai_chats")
 }

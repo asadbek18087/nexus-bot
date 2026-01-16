@@ -34,7 +34,7 @@ export default function ContentViewer() {
 
   const handleAction = (item: ContentItem, action: 'watch' | 'download') => {
     // Deep link to Telegram bot
-    const botUsername = "nexus_media_bot"; // Replace with actual bot username
+    const botUsername = "polway_bot"; // Replace with actual bot username
     const startParam = `${item.type}_${item.id}`;
     const url = `https://t.me/${botUsername}?start=${startParam}`;
     window.open(url, '_blank');
